@@ -7,7 +7,7 @@ visible: true
 ---
 <!-- Reviewed at c4c45ce9a7a8f4aa6d88a32829755196a017f6a1 -->
 
-# Differences Between Paper and Implementation
+# 论文与实现的区别
 
 The goal of this document is to enumerate all ways in which Cardano SL
 implementation differs from the specifications presented in the *Ouroboros*

@@ -1,38 +1,28 @@
-# Cardano SL documentation
+# WIP
 
-[Official website](https://cardanodocs.com/). Build on [Jekyll](https://jekyllrb.com/) with [Github Pages](https://pages.github.com/).
+# 卡尔达诺清算层中文文档
 
-## Where is it?
+[网站](https://cncardanodocs.com/)。基于 [Jekyll](https://jekyllrb.com/) 以及 [Github Pages](https://pages.github.com/) 构建。
 
-Manage, add and edit documents only in `/_docs/` folder. Use any folder structure you like. Final permalink url is defined in each page header.
+[原文档地址](https://cardanodocs.com/introduction/)
 
-## Header examples
 
-Header example:
-<pre>
----
-layout: default
-title: Getting started
-group: base
-children: getting-started
----
-</pre>
+域名购买于 2018.01.03, 有效期是 2 年，就目前的情况来说，不能保证两年后一定会为这个网站续费，未来可能会将翻译文档 merge 到源仓库，视情况而定。这些文档的翻译属于个人行为，不以盈利为目的，会尽可能保证原文档的风格，不做艺术加工，原版权属于 Cardano。  
 
-Page anchors example (  Heading sentence: heading-sentence):
-<pre>
----
-layout: default
-title: Introduction
-permalink: /introduction/
-group: base
-anchors:
-  Cryptocurrency Basics: cryptocurrency-basics
-  What Makes Cardano SL Special?: what-makes-cardano-sl-special
-  Beyond Settlement Layer: beyond-settlement-layer
----
-</pre>
+**翻译和维护耗费大量精力，如果这些中文文档为你节约了时间，给你带来了收益，又或者纯粹是因为太有钱，你可以考虑捐助：**
 
-## Menu order
+### ADA
 
-Items in menu can be reordered by its date prefix in the filename eg: `2017-01-01-filename.md`.
-For now. Can be sorted otherwise later.
+DdzFFzCqrhspBoWynEJWNGXqcR5rWg3q8KQu6zhxE3S2Pcwvm7r88P3eG9fVu27dwasjwrWLhEHzcXhYnbipXhxfxrYBHrhtLER1wQMV
+
+
+### BTC/BCC
+
+1Aa8ZXPbzoyHGp9SmnWjSaNq56py3jCj96
+
+
+### ETH
+
+0x3A149665Fb7fe1b44892D50eCA0bd2BdcD21C85D
+
+

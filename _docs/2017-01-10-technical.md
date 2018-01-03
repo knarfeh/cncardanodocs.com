@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Technical details
+title: 技术细节
 group: base
 permalink: /technical/
 children: technical
@@ -8,107 +8,73 @@ children: technical
 
 <!-- Reviewed at d0868afac50ba6ffcbd95054e65cbf77fa513082 -->
 
-# Cardano SL Technical Details
+# 卡尔达诺运算层技术细节
 
-This section is a starting point for developers who wish to contribute to the
-original client, as well as those who wish to undertake making their own client
-for Cardano SL. Nonetheless, this section covers the original client to great
-extent, assuming that it will be the initial reference client for some time.
+对于想要贡献原始客户端，以及想基于卡尔达诺清算层创建自己的客户端的开发人员来说，这一章节是一个起点。尽管如此，这一节将主要覆盖原始客户端，并有所扩展，在一段时间内可以把它当做最初的参考文档
 
-## High-level overview
+## 高层次概述
 
-A Cardano SL node is a blockchain node. When ran, it finds other nodes (via
-[DHT](http://ast-deim.urv.cat/cpairot/dhts.html)) and then starts performing
-blockchain-related procedures.
+一个卡尔达诺清算层节点是一个区块链节点。运行时，他会找到其他节点(通过 [DHT](http://ast-deim.urv.cat/cpairot/dhts.html))，然后开始执行区块链的相关任务。
 
-Time in Cardano SL is divided into *epochs*. Every epoch is divided into
-*slots*. Epochs and slots are numbered. Therefore, the slot `(3,5)` is read as
-"the fifth slot of the third epoch" (the 0-th slot and the 0-th epoch are also
-possible).
+卡尔达诺清算层中的时间会以 epochs 划分。epochs 又会以 slots 划分。 Epochs 和 slots 会被编号。 因此，slot `(3,5)` 被读作『第3个 epochs 的第5个 slot』 (第0个 slot 以及第0个 epoch 也是可以的).
 
-Cardano SL uses sets of constants, special values defined in
-[the `constants.yaml` configuration file](https://github.com/input-output-hk/cardano-sl/blob/bf5dd592b7bf77a68bf71314718dc7a8d5cc8877/core/constants.yaml).
-There are two main sets: for production mode and development mode. In this guide
-we'll refer to productions constants.
+卡尔达诺清算层会使用一些常量集, 特殊值定义在
+[`constants.yaml` 配置文件中](https://github.com/input-output-hk/cardano-sl/blob/bf5dd592b7bf77a68bf71314718dc7a8d5cc8877/core/constants.yaml)。
+主要有两种：生产模式和开发模式。 在本指南中，我们将参考生产常量。
 
-Suppose the values for Cardano SL are:
+假设卡尔达诺清算层的值是：:
 
--   slot duration: 120 seconds,
--   security parameter *k*: 60.
+-   slot 持续时间: 120秒,
+-   安全参数 *k*: 60.
 
-In other words, **a slot lasts 120 seconds**, and an epoch has [`10×k`](https://github.com/input-output-hk/cardano-sl/blob/9ee12d3cc9ca0c8ad95f3031518a4a7acdcffc56/core/Pos/Core/Constants/Raw.hs#L161)
-slots in it, so it lasts **1200 minutes** or **20 hours**.
+换句话说，, **一个 slot 可以持续120秒**, 而一个 epochs有 [`10×k`](https://github.com/input-output-hk/cardano-sl/blob/9ee12d3cc9ca0c8ad95f3031518a4a7acdcffc56/core/Pos/Core/Constants/Raw.hs#L161)
+个 slot, 所以它可以持续**1200分钟**或**20个小时**.
 
-There is one node called the slot leader on each slot. Only this node has right
-to generate a new block during this slot; this block will be added to the
-blockchain. However, there's no guarantee that new block will be actually
-generated (e.g. slot leader can be offline during a corresponding slot).
+每个 slot 上有一个节点被称作 slot 领导者。只有这个 slot 有权在这些 slot 中生成一个新区块；这个区块会被加入到区块链中。然而我们并不能确保这个区块一定会被生成(比如 slot 领导者在响应的过程中可能会离线)。
 
-Furthermore, slot leader may delegate its right to another node `N`; in this
-case node `N` will have a right to generate a new block instead of slot leader.
-Please note that node `N` with delegated right is not called a slot leader
-though, it is just a delegate.
+此外，slot 领导者可以将其权利委托给另一个节点 `N`；在这种情况下，节点 `N` 而非 slot 领导者将有权生成一个新的块。请注意，`N` 具有委托权的节点不能被称为 slot 领导者，它只是一个委托。
 
-It's theoretically possible to delegate the slot leader's right to multiple
-nodes, but it is **not** recommended by reasons explained later. Moreover, we can
-run multiple nodes with the same key (i.e. on one computer), let's say nodes
-`A`, `B` and `C`, and if node `A` is elected as the slot leader, not only `A`
-itself, but nodes `B` and `C` will be able to generate a new block as well. In
-this case, every one of these nodes will issue a most probably different block,
-and the network will fork — each other node will accept **only one** of these
-concurrent blocks. Later, this fork will be eliminated.
+理论上可以将 slot 领导者的权力委托给多个节点，但是不推荐，之后会解释原因。此外，使用相同的密钥（即一台计算机上）我们可以运行中多个节点，假设有节点 `A`, `B`, `C`，如果节点 `A` 被选为 slot 领导者，不仅 `A` 本身，节点 `B` 和 `C` 都能够生成一个新区块。在这种情况下，每一个节点都将发出一个不同的块，网络将分叉 - 每个其他节点将只接受这些并发区块块中的一个。之后，这个分叉将被淘汰。
 
-During the epoch, nodes send each other MPC messages to come to the consensus as
-to who would be allowed to generate blocks in the next epoch. Payloads from
-`Data` messages (along with transactions) are included into blocks.
+在 epoch 中，节点之间相互发送 MPC 消息，以达成共识，谁将被允许在下一个时期生成区块。Data 消息中的有效载荷 （以及事务）会被包含在块中。
 
-The more currency (or "stake") an address holds, the more likely it is to be
-chosen to generate a block. Please read about [Ouroboros Proof of Stake Algorithm](/cardano/proof-of-stake/)
-for more details.
+一个地址持有的货币（或『股份』）越多，被选择生成一个区块的可能性就越大。请阅读 [Ouroboros 权益证明算法](/cardano/proof-of-stake/)获取更多细节。
 
-In short:
 
-1.  send messages,
-2.  receive messages/transactions/etc,
-3.  form a block (if you are the slot leader),
-4.  repeat.
+简而言之:
 
-## Business logic
+1. 发送信息，
+2. 接收信息/交易/等等，
+3. 形成一个区块 (如果你是 slot 领导者的话)，
+4. 重复。
 
-### Listeners
+## 商业逻辑
 
-Listeners handle incoming messages and respond to them. Various supplemental
-listeners will not be covered, focusing on the main ones instead.
+### 接收者
 
-Listeners mostly use the [Relay
-framework](/technical/protocols/csl-application-level/#invreqdata-and-messagepart),
-which includes three type of messages:
+接收者处理传入的消息并对其作出响应。各种补充的听众不会被覆盖，而是集中在一个接收者上。
 
--   `Inventory` message: node publishes message to network when gets a new data.
--   `Request` message: node requests a new data which was published in
-    `Inventory` message, from other node, if this data is not known yet by
-    this node.
--   `Data` message: node replies with this message on `Request` message. `Data`
-    message contains concrete data.
+接收者大多使用[中继框架](/technical/protocols/csl-application-level/#invreqdata-and-messagepart)，其中包括三种类型的消息：
 
-For instance, when a user creates a new transaction, the wallet sends
-`Inventory` message with transaction id to the network. If the node that has
-received `Inventory` doesn't know any transaction with such id, then it replies
-with `Request` message, after that the wallet sends this transaction in `Data`
-message. After the node has received the `Data` message, it can send the
-`Inventory` message to its neighbors in DHT network and repeat previous
-iterations again.
+* `Inventory` 消息：节点在获取新数据时向网络发布消息。  
+* `Request` 消息：如果某个新数据没有被这个节点获取的话，节点会向其他节点获取在 `Inventory` 消息中的新数据。  
+* `Data` 消息：节点对 `Request` 消息回复的数据。`Data`消息包含具体的数据。
 
-Another example - block listeners [`handleGetHeaders`](https://github.com/input-output-hk/cardano-sl/blob/69e896143cb02612514352e286403852264f0ba3/src/Pos/Block/Network/Listeners.hs#L30),
-[`handleGetBlocks`](https://github.com/input-output-hk/cardano-sl/blob/69e896143cb02612514352e286403852264f0ba3/src/Pos/Block/Network/Listeners.hs#L50),
-[`handleBlockHeaders`](https://github.com/input-output-hk/cardano-sl/blob/69e896143cb02612514352e286403852264f0ba3/src/Pos/Block/Network/Listeners.hs#L77).
+例如，当用户创建新的交易时，钱包将具有交易 ID 的 `Inventory` 消息发送到网络。如果收到 `Inventory` 的节点没有该 ID 相关的交易记录，那么它会回复 `Request` 消息，然后钱包会在 `Data` 消息中发送该交易信息。节点收到 `Data` 消息后，将 `Inventory` 消息发送给 DHT 网络中的邻居，并重复之前的操作。
 
-### Workers
+另一个例子 - 区块接收者：[`handleGetHeaders`](https://github.com/input-output-hk/cardano-sl/blob/69e896143cb02612514352e286403852264f0ba3/src/Pos/Block/Network/Listeners.hs#L30)，
+[`handleGetBlocks`](https://github.com/input-output-hk/cardano-sl/blob/69e896143cb02612514352e286403852264f0ba3/src/Pos/Block/Network/Listeners.hs#L50)，
+[`handleBlockHeaders`](https://github.com/input-output-hk/cardano-sl/blob/69e896143cb02612514352e286403852264f0ba3/src/Pos/Block/Network/Listeners.hs#L77)。
 
-A Worker is an action repeated with some interval. For example:
+### Worker
 
--   [`onNewSlotWorker`](https://github.com/input-output-hk/cardano-sl/blob/69e896143cb02612514352e286403852264f0ba3/infra/Pos/Communication/Protocol.hs#L218): Runs at the beginning of each slot. Does some cleanup and
-    then runs additional functions. This worker also creates a
+一个 Worker 会在一个时间区间内进行重复性的工作. 比如：
+
+
+onNewSlotWorker：在每个插槽的开始处运行。做一些清理，然后运行其他功能。这个工人在这个时代的开始也创造了一个 起始块。有两种块：“生成块”和“主块”。主块储存在区块链中; 在时代之间，每个节点都会产生生成块。Genesis块不会被通告给其他节点。然而，如果节点离线一段时间，并且需要赶上区块链，节点可以请求其他人的创世区块。
+blkOnNewSlot：创建一个新块（当节点轮到创建一个新块时）并将其发布给其他节点。
+
+-   [`onNewSlotWorker`](https://github.com/input-output-hk/cardano-sl/blob/69e896143cb02612514352e286403852264f0ba3/infra/Pos/Communication/Protocol.hs#L218): 在每个 slot 开始时进行工作。做一些清理，然后运行其他功能。This worker also creates a
     *genesis block* at the beginning of the epoch. There are two kinds of
     blocks: "genesis blocks" and "main blocks". Main blocks are stored in the
     blockchain; genesis blocks are generated by each node internally between

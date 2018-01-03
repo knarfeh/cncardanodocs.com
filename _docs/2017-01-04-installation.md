@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Installation
+title: 安装
 permalink: /installation/
 group: base
 children: dsa
@@ -8,10 +8,10 @@ children: dsa
 
 <!-- Reviewed at d0868afac50ba6ffcbd95054e65cbf77fa513082 -->
 
-# Installation
+# 安装
 
 <!-- CARDANO_SL_README_BEGIN_3 -->
-## Supported Platforms
+## 支持的平台
 
 Supported platforms are Windows, macOS and Linux. There are
 [installers for Windows and macOS](https://daedaluswallet.io/#download),
