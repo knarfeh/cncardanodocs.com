@@ -9,54 +9,35 @@ visible: true
 
 # Ouroboros 权益证明算法
 
-Ouroboros Proof of Stake Algorithm is the most important part of the protocol.
-It defines the way nodes reach consensus about the state of [ledger](/glossary/#ledger).
+Ouroboros 权益证明算法是协议中最重要的部分。它定义了节点达到[账本](/glossary/#ledger)一致性的方式。
 
-Ouroboros is unique as it is the first blockchain protocol based on proof of
-stake that is scientifically proved to be secure.
+Ouroboros 是唯一一个基于科学证明的安全的区块链权益证明协议。
 
-## Why Proof of Stake?
 
-The most important thing about picking proof of stake (PoS) algorithm over proof of
-work (PoW) — the one adopted by Bitcoin — is the energy consumption considerations.
-Running the Bitcoin protocol is a tremendously expensive endeavor. It is
-estimated that 3.8 American households can be powered for a day by the energy
-spent to generate one Bitcoin transaction. These energy requirements for running
-the Bitcoin protocol only grow as more and more Bitcoin miners sink money into
-mining, and the difficulty of the problems that their computers (mining rigs)
-are cracking increases. This is why researchers did their best to investigate
-alternative ways to reach consensus — such as using the so-called BFT (Byzantine
-Fault Tolerant) consensus algorithms and PoS algorithms.
+## 为什么要有权益证明？
+不选择被比特币采用的 PoW（工作量证明）而选择 PoS (权益证明) 最重要的原因是考虑了能源消耗。运行比特币协议非常消耗资源，据估计，一个比特币的转账所需要的能源是3.8个美国家庭一天消耗的能源。随着越来越多的比特币矿工将资金投入矿业，运行比特币协议的能源要求只会越来越高，他们挖矿的难度也会越来越大。也是为什么研究人员尽力研究达成共识的替代算法，比如使用所谓的 BFT（Byzantine Fault Tolerant）一致性算法和 PoS 算法。
 
-## What is Proof of Stake?
+## 什么是权益证明算法
 
-### Proof
+### 证明
 
-The “proof” part of “proof of stake” is about having evidence that blocks of
-transactions are legitimate.
+『权益证明』的『证明』部分是要证明交易块是合法的。
 
-### Stake
 
-“Stake” means “the relative value held by addresses on the node”. By “relative
-value” we mean “all value held by wallets on a particular node divided by total
-value in the Cardano SL system”. Please read about [Balance and Stake in Cardano
-SL](/cardano/balance-and-stake/) for more details.
+### 权益
 
-## Slot Leaders
+『权益』值得是节点上的地址所拥有的相对价值。『相对价值』指的是『卡尔达诺清算层系统中某个节点钱包上的价值除以总价值』。请阅读 [卡尔达诺清算层的平衡和权益](/cardano/balance-and-stake/) 章节获取更多信息。
 
-Nodes with a positive stake are called stakeholders, and only stakeholders may
-participate in running the protocol. Moreover, to be able to generate new blocks
-for the blockchain, stakeholder must be elected as a slot leader. Slot leader may
-listen to transactions announced by other nodes, make a block of those transactions,
-sign this block with its secret key and publish it to the network.
 
-You can think of a slot leader as a miner in Bitcoin, but consensus mentioned above
-defines who will be able to mine, when and how much.
+## Slot 领导者
 
-## Epochs and Slots
+有正资产的节点称作 stakeholders，只有 stakeholders 能参与运行协议。stakeholders 必须被选举为 slot 领导者才让区块链生成块。Slot leader 可能监听到其他节点的交易信息，然后通过密钥生成一个交易区块发给全网。
 
-Ouroboros protocol divides the physical time into **epochs**, and each epoch is
-divided into **slots**:
+你可以认为 slot 领导者是比特币中的矿工，但上述的一致性协议会确定谁，什么时候能挖矿，能挖到多少矿。
+
+## Epochs 和 Slots
+
+Ouroboros 协议将物理的时间划分为 **epochs**, 每一个 epoch 又划分为 **slots**:
 
 ```
 +----------+----------+-------+----------+--------------------> t
@@ -66,9 +47,10 @@ divided into **slots**:
   -------------- epoch M ---------------   -- epoch M+1 -- ...
 ```
 
-Please note that slot is relatively short period of time (for example, 20 seconds).
 
-Each slot has one and only one leader (slot leader, SL):
+请注意 slot 是相对较短的一段时间（比如 20 秒）。
+
+每个 slot 有且只有一个 领导者（slot leader，SL）：
 
 ```
 +----------+----------+-------+----------+----> t
@@ -78,6 +60,8 @@ Each slot has one and only one leader (slot leader, SL):
 ```
 
 Slot leader has a (sole) right to produce one and only one block during his slot:
+
+slot 领导者有权在他的 slot 内生成一个区块。
 
 ```
   +------+   +------+           +------+
@@ -89,42 +73,28 @@ Slot leader has a (sole) right to produce one and only one block during his slot
     SL 0       SL 1               SL N
 ```
 
-It means that the number of slot leaders is strictly equal to the number of slots
-in epoch (let's call this number `N`), so it is impossible to produce more than `N`
-blocks during an epoch.
 
-If slot leader missed his slot (for example, he was offline at that moment), he
-lost his right to produce a block until he will be elected again. So one or more
-slots can remain empty (i.e. without generated blocks), but please note that the
-most of blocks (i.e. at least 50% + 1) **must** be generated during an epoch.
+这意味着 slot 领导者的数量一定等于一个 epoch 内 slots 的数量（不妨设为 `N`)，因此不可能在一个 epoch 里面生成超过 `N` 个区块。
 
-## Slot Leaders Election
+如果 slot leader 错过了它的 slot（比如，在那个阶段它离线了），在下一次被选举为领导者之前，它没有权利在生成区块。因此，可以有一个或多个 slots 是空的（即，不生成区块），请注意，在一个 epoch 期间，它必须生成大部分块（至少50%+1）。
 
-Slot leaders are elected from among all stakeholders. Please note that not all stakeholders
-participate in this election, but only ones who have enough stake (for example, 2% of
-the total stake). Let's call this group of stakeholders “electors”.
 
-During an epoch electors elect slot leaders for the next epoch. Thus, at the end of epoch
-`N` it is already known who are slot leaders for the epoch `N+1`, and it cannot be
-changed.
+## Slot 领导者选举
 
-You can think of this election as a “fair lottery”: anyone from stakeholders can become
-a slot leader. But important idea of PoS is that the more stake stakeholder has, the more
-chances one has to be elected as a slot leader. 
+Slot 领导者从所有的 stakeholders 中选举。请注意并不是所有的 stakeholders 能参与这次选举，只有有足够多的权益（比如，总量的 %2)才有资格。我们称这些 stakeholders 为『候选人』
 
-Please note that one stakeholder can be elected as a slot leader for more than one slot
-during the same epoch.
+在 epoch 的选举中会选举一个 slot 领导者参与下一次 epoch。因此，在 epoch `N` 结束的时候，我们就能知道 epoch `N+1` 的 slot leaders 是谁，并且这是不可更改的。
 
-### Multiparty Computation
+你可以把这样的选举当做 『公平抽签』：stakeholders 中的任何一个都能成为 slot leader。PoS 中一个很重要的的思想是，stakeholders 拥有的 stake 越多，它被选举为 slot 领导者的可能性也就越大。
 
-The fundamental problem of election process is its unbiasedness. We need some randomness
-as a base for election, in this case results of this election will be random and fair.
-So the question is where this randomness can be obtained from?
+请注意同一个 epoch，一个 stakeholders 可以被多次选做 slot 领导者。
 
-We are using multiparty computation (MPC) approach: each elector independently performs an
-action which can be called “coin tossing” and after that shares result with other electors.
-The idea is that results are randomly generated by each elector, but eventually they agree on
-the same final value.
+
+### 多方计算
+
+选举过程的根本问题是无偏性。我们需要一些随机性作为选举的基础，这样的话，选举的结果是随机的，公平的，问题是这个随机性从哪来？
+
+我们用多方计算（multiparty computation (MPC) ）方法：每个选民独立进行一次『投硬币』的行为，然后与其他选民分享结果。这个想法就是：结果由每个选民随机产生，但最终它们在相同的最终价值上达成一致。
 
 #### Commitment Phase
 

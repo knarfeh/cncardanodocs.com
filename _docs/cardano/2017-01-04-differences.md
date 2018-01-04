@@ -9,25 +9,19 @@ visible: true
 
 # 论文与实现的区别
 
-The goal of this document is to enumerate all ways in which Cardano SL
-implementation differs from the specifications presented in the *Ouroboros*
-protocol [paper](/glossary/#paper) and to clarify everything that may be obscure
-after reading the paper.
+本文档的目标是概述卡尔达诺清算层实现方式与[论文](/glossary/#论文)中提供的 Ouroboros 协议规范的不同，并阐明论文中相对晦涩的部分。
 
-This document is divided into four parts:
+本文档分为四个部分：
 
-1.  *Clarifications* part clarifies some details which are not specified in the
-    paper, but are important for practical implementation.
-2.  *Modifications* part outlines things which are specified in the paper, but are
-    implemented differently in Cardano SL.
-3.  *Added features* part briefly mentions new features which are not described
-    in paper, but have been implemented in Cardano SL.
-4.  *Omissions* part lists topics described in paper but not implemented into
-    Cardano SL.
+1. *说明* 部分会阐述在论文中没有提到但实际实现中非常重要的细节。  
+2. *修改* 部分列出哪些在论文中有说明，但在卡尔达诺清算层中以不同的方式实现。  
+3. *新增功能* 部分简要概述了在论文中没有介绍但在卡尔达诺清算层中实现的新功能。  
+4. *遗漏* 部分列出了论文中有描述，但尚未在卡尔达诺清算层中实现的特性。
 
-# Clarifications
 
-## Time, Slots, and Synchrony
+# 说明
+
+## 时间, Slots, and 同步
 
 In a basic model of the protocol time is divided into discrete units called
 *slots*. However, there are no details on how to obtain current time securely
@@ -139,19 +133,16 @@ However, a practical implementation should account for such scenarios.
 Cardano SL implementation uses a seed consisting of all zeroes if there are no
 commitments that could be recovered.
 
-# Added Features
+# 增加的特性
 
-## Update System
+## 更新系统
 
-See the article on [update system](/cardano/update-mechanism/).
+请查阅这篇文章：[更新系统](/cardano/update-mechanism/).
 
-## Security of P2P
+## P2P 的安全性
 
-See the article on [P2P implementation and
-hardening](/technical/protocols/p2p/).
+请查阅这篇文章：[P2P 的实现和强化](/technical/protocols/p2p/).
 
-# Omissions
+# 遗漏
+*输入背书人*和*激励结构*还没有实现。这些部分将与侧链悬而未决的研究一起实现，并随侧链的发布一起发布。
 
-The sections on *Input Endorsers* and *Incentive Structure* are not implemented
-yet. Those sections are to be implemented together with the pending research on
-Side-chains and released within the Side-chains release.

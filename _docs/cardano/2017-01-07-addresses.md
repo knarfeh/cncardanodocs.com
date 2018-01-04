@@ -8,6 +8,14 @@ group: cardano
 
 # 卡尔达诺清算层的地址
 
+要发送和接收价值，基本所有加密货币都使用地址。卡尔达诺清算层支持 3 种类型的地址：
+
+1. 公钥地址
+2. 脚本地址
+3. 兑换地址
+
+
+
 To send and receive value, addresses are used in virtually all cryptocurrencies.
 Cardano SL supports 3 main types of addresses:
 

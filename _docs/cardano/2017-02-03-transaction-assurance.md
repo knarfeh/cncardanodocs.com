@@ -1,6 +1,6 @@
 ---
 layout: default
-title: 转账保证等级
+title: 交易确认层级
 permalink: /cardano/transaction-assurance/
 group: cardano
 ---
@@ -64,10 +64,10 @@ group: cardano
     width: 25%;
 }
 </style>
-# Transaction Assurance Level
+# 交易确认层级
 
-Tables below show color-coded levels of assurance that a transaction won’t be
-canceled by some fork.
+下面的表格基于颜色表示确认层级，以确保交易不会被某些分叉取消。
+
 
 For example, at normal security level, if the attacker’s stake is **10%** (or $6
 millions for Cardano market capitalization of $60 millions), the levels of
