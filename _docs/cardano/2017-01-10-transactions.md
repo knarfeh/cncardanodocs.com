@@ -1,14 +1,14 @@
 ---
 layout: default
-title: Transactions
+title: 转账
 permalink: /cardano/transactions/
 group: cardano
 ---
 <!-- Reviewed at a6a1cdf72c7e167a13f500c0679c01fe4cfa0ca8 -->
 
-# Transactions in Cardano SL
+# 卡尔达诺清算层的转账
 
-## Overview
+## 概要
 
 A transaction (*tx*) is a special data which represents the *act* of the value
 transferring between nodes (from the user's point of view, transferring between
@@ -27,7 +27,7 @@ some slot leader will store this transaction in some block in the ledger. Please
 note that if the network is under high load, it may take a lot of time for
 transaction to be actually added to the block.
 
-## Design
+## 设计
 
 Each transaction contains a list of *inputs* and a list of *outputs*; outputs of
 the transaction `Tx0` can be used as inputs of the other transaction `Tx1`, and

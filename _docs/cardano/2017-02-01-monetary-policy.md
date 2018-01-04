@@ -1,12 +1,12 @@
 ---
 layout: default
-title: Monetary Policy
+title: 货币政策
 permalink: /cardano/monetary-policy/
 group: cardano
 ---
 <!-- Reviewed at 1bd2a2f5979233f4f50a7e66ab4e1819ac486400 -->
 
-# Cardano Monetary Policy
+# 卡尔达诺货币政策
 
 <div style="border-radius:5px;padding:5px 10px;background: #cdeffc;" markdown="1">
 

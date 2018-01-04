@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Transaction Assurance Level
+title: 转账保证等级
 permalink: /cardano/transaction-assurance/
 group: cardano
 ---

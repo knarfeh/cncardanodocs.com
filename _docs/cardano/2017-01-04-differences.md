@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Differences Between the Paper and the Implementation
+title: 论文与实现的区别
 permalink: /cardano/differences/
 group: cardano
 visible: true

@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Time-Warp-NT Layer
+title: Time-Warp-NT 层
 permalink: /technical/protocols/time-warp-nt/
 group: technical-protocols
 ---

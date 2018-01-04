@@ -1,6 +1,6 @@
 ---
 layout: default
-title: HD wallets
+title: HD 钱包
 permalink: /technical/hd-wallets/
 group: technical
 visible: true

@@ -1,12 +1,12 @@
 ---
 layout: default
-title: Addresses
+title: 地址
 permalink: /cardano/addresses/
 group: cardano
 ---
 <!-- Reviewed at a6a1cdf72c7e167a13f500c0679c01fe4cfa0ca8 -->
 
-# Addresses in Cardano SL
+# 卡尔达诺清算层的地址
 
 To send and receive value, addresses are used in virtually all cryptocurrencies.
 Cardano SL supports 3 main types of addresses:

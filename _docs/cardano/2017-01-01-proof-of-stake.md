@@ -1,13 +1,13 @@
 ---
 layout: default
-title: Ouroboros Proof of Stake Algorithm
+title: Ouroboros 权益证明算法
 permalink: /cardano/proof-of-stake/
 group: cardano
 visible: true
 ---
 <!-- Reviewed at c4c45ce9a7a8f4aa6d88a32829755196a017f6a1 -->
 
-# Ouroboros Proof of Stake Algorithm
+# Ouroboros 权益证明算法
 
 Ouroboros Proof of Stake Algorithm is the most important part of the protocol.
 It defines the way nodes reach consensus about the state of [ledger](/glossary/#ledger).

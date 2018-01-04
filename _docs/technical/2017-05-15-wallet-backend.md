@@ -1,13 +1,13 @@
 ---
 layout: default
-title: Cardano SL Wallet Backend
+title: 卡尔达诺清算层钱包后端
 permalink: /technical/wallet-backend/
 group: technical
 visible: true
 ---
 <!-- Reviewed at ac0126b2753f1f5ca6fbfb555783fbeb1aa141bd -->
 
-# Cardano SL Wallet Backend
+# 卡尔达诺清算层钱包后端
 
 While addresses discussed in [Addresses](/cardano/addresses/) section are
 fundamental to send and receive funds, wallets are a way to simplify these

@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Transaction Fees
+title: 转账费用
 permalink: /cardano/transaction-fees/
 group: cardano
 ---

@@ -1,6 +1,6 @@
 ---
 layout: default
-title: CSL Application-Level Messaging
+title: CSL 应用层消息
 permalink: /technical/protocols/csl-application-level/
 group: technical-protocols
 ---

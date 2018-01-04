@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Leader Selection in Cardano SL
+title: 卡尔达诺清算层中的 Leader 选举
 permalink: /technical/leader-selection/
 group: technical
 visible: true

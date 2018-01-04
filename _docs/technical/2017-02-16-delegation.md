@@ -1,13 +1,13 @@
 ---
 layout: default
-title: Stake Delegation in Cardano SL
+title: 卡尔达诺股权委派
 permalink: /technical/delegation/
 group: technical
 visible: true
 ---
 <!-- Reviewed at c23493d7a33a82d559d5bd9d289486795cf6592f -->
 
-# Stake Delegation in Cardano SL
+# 卡尔达诺清算层股权委派
 
 This chapter describes implementation details of the stake delegation process.
 

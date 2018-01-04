@@ -1,6 +1,6 @@
 ---
 layout: default
-title: For Contributors
+title: 对于贡献者
 group: base
 permalink: /for-contributors/
 children: for-contributors

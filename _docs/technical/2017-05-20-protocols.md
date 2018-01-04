@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Protocols
+title: 协议
 group: technical
 children: technical-protocols
 ---

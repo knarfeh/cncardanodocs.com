@@ -1,12 +1,12 @@
 ---
 layout: default
-title: Introduction
+title: 介绍
 permalink: /technical/plutus/introduction/
 group: technical-plutus
 ---
 <!-- Reviewed at f766612fb6c75b941cbe3c2d9c2db17dd2dc9bd3 -->
 
-# Plutus Introduction
+# Plutus 介绍
 
 Plutus is a strictly typed pure functional programming language used for
 defining smart contracts in Cardano. The syntax is fairly Haskell-like, but
