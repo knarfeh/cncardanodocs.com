@@ -28,3 +28,12 @@ DdzFFzCqrhspBoWynEJWNGXqcR5rWg3q8KQu6zhxE3S2Pcwvm7r88P3eG9fVu27dwasjwrWLhEHzcXhY
 ## **ETH**
 
 0x3A149665Fb7fe1b44892D50eCA0bd2BdcD21C85D
+
+
+### 微信
+
+![weixinpay](http://7xi5vu.com1.z0.glb.clouddn.com/wechatpay.jpg?imageView2/0/w/250/h/250)
+
+### 支付宝
+
+![zhifubao](http://7xi5vu.com1.z0.glb.clouddn.com/zhifubaopay.jpg?imageView2/0/w/250/h/250)
