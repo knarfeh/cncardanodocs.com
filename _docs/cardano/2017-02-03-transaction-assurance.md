@@ -68,29 +68,22 @@ group: cardano
 
 下面的表格基于颜色表示确认层级，以确保交易不会被某些分叉取消。
 
+举个例子，在正常的安全级别，如果攻击者的份额是10％（或600万美元，卡尔达诺市值6000万美元），则用户交易的确认级别是：
 
-For example, at normal security level, if the attacker’s stake is **10%** (or $6
-millions for Cardano market capitalization of $60 millions), the levels of
-assurance for a user’s transaction are:
+1. 最低确认（用红色编码） - 当用户的转账确认数小于**3**个区块时。
+2. 中等确认（用黄色编码） - 用用户的转账确认数为**3**到**7**块。
+3. 高度确认（用绿色编码） - 当用户的转账具有**9**个或更多区块的确认时。
 
-1.  Lowest assurance (color-coded with red) — when the user’s block with coin
-    transfer transaction has depth less than **3** blocks.
-2.  Medium assurance (color-coded with yellow) — when the user’s block has depth
-    from **3** to **7** blocks.
-3.  High assurance (color-coded with green) — when the user’s block has depth
-    **9** or more blocks.
+## 正常安全层级
 
-## Normal Security Level
+正常级别可以防攻击（这个模型将包含在最新版本的乌洛波罗斯算法中），表中的数值对应6亿美元的卡尔达诺市值。
 
-Normal level is for covert adversaries (the model is described in the latest
-version of Ouroboros being prepared now to be shared). Values in the table
-correspond to Cardano market capitalization of $60 millions.
 
 <table class="full-width">
 <tr>
-    <th class="center">             Attackers' stake, %</th>
-    <th class="center pct25">       Attackers’ stake, $ mln </th> 
-    <th colspan="6" class="center"> Assurance level         </th>
+    <th class="center">             攻击者的份额，%</th>
+    <th class="center pct25">       攻击者的份额，$ mln </th> 
+    <th colspan="6" class="center"> 确认水平         </th>
 
 </tr>
 <tr class="center">
@@ -237,17 +230,16 @@ correspond to Cardano market capitalization of $60 millions.
 
 </tr>
 </table>
-## Strict Security Level
+## 严格安全层级
 
-Strict security level protects against all types of adversaries (it requires
-more block confirmations). Values in the table correspond to Cardano market
-capitalization of $60 millions.
+严格的安全层级可以防止所有的攻击（它需要更多的块确认）。表中的数值对应6亿美元的卡尔达诺市值。
+
 
 <table class="full-width">
 <tr>
-    <th class="center">             Attackers' stake, %</th>
-    <th class="center pct25">       Attackers’ stake, $ mln </th> 
-    <th colspan="6" class="center"> Assurance level         </th>
+    <th class="center">             攻击者的份额，%</th>
+    <th class="center pct25">       攻击者的份额，$ mln </th> 
+    <th colspan="6" class="center"> 确认水平         </th>
 
 </tr>
 <tr class="center">

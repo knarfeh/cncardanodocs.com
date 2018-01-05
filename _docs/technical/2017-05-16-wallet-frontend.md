@@ -1,13 +1,13 @@
 ---
 layout: default
-title: 卡尔达诺清算层钱包前端
+title: 卡尔达诺结算层钱包前端
 permalink: /technical/wallet-frontend/
 group: technical
 visible: true
 ---
 <!-- Reviewed at cd26fb28eb48f893a4ca2d045a10da19c211b807 -->
 
-# 卡尔达诺清算层钱包前端
+# 卡尔达诺结算层钱包前端
 
 When developing Cardano SL, the need arose for a UI from which users could
 access their funds, send and receive transactions, and perform other tasks

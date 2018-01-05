@@ -1,6 +1,6 @@
 # WIP
 
-# 卡尔达诺清算层中文文档
+# 卡尔达诺结算层中文文档
 
 [cncardanodocs.com](https://cncardanodocs.com/)。基于 [Jekyll](https://jekyllrb.com/) 以及 [Github Pages](https://pages.github.com/) 构建。
 

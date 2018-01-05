@@ -1,6 +1,6 @@
 title: 卡尔达诺
 email: cardano@iohk.io
-description: 清算层文档
+description: 结算层文档
 baseurl: ""
 url: "https://cncardanodocs.com"
 include: ["_pages","_docs"]

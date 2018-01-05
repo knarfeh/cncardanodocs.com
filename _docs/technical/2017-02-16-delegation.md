@@ -7,7 +7,7 @@ visible: true
 ---
 <!-- Reviewed at c23493d7a33a82d559d5bd9d289486795cf6592f -->
 
-# 卡尔达诺清算层股权委派
+# 卡尔达诺结算层股权委派
 
 This chapter describes implementation details of the stake delegation process.
 

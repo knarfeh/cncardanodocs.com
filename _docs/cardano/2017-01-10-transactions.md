@@ -6,7 +6,7 @@ group: cardano
 ---
 <!-- Reviewed at a6a1cdf72c7e167a13f500c0679c01fe4cfa0ca8 -->
 
-# 卡尔达诺清算层的转账
+# 卡尔达诺结算层的转账
 
 ## 概要
 

@@ -8,21 +8,21 @@ children: technical
 
 <!-- Reviewed at d0868afac50ba6ffcbd95054e65cbf77fa513082 -->
 
-# 卡尔达诺运算层技术细节
+# 卡尔达诺结算层技术细节
 
-对于想要贡献原始客户端，以及想基于卡尔达诺清算层创建自己的客户端的开发人员来说，这一章节是一个起点。尽管如此，这一节将主要覆盖原始客户端，并有所扩展，在一段时间内可以把它当做最初的参考文档
+对于想要贡献原始客户端，以及想基于卡尔达诺结算层创建自己的客户端的开发人员来说，这一章节是一个起点。尽管如此，这一节将主要覆盖原始客户端，并有所扩展，在一段时间内可以把它当做最初的参考文档
 
 ## 高层次概述
 
-一个卡尔达诺清算层节点是一个区块链节点。运行时，他会找到其他节点(通过 [DHT](http://ast-deim.urv.cat/cpairot/dhts.html))，然后开始执行区块链的相关任务。
+一个卡尔达诺结算层节点是一个区块链节点。运行时，他会找到其他节点(通过 [DHT](http://ast-deim.urv.cat/cpairot/dhts.html))，然后开始执行区块链的相关任务。
 
-卡尔达诺清算层中的时间会以 epochs 划分。epochs 又会以 slots 划分。 Epochs 和 slots 会被编号。 因此，slot `(3,5)` 被读作『第3个 epochs 的第5个 slot』 (第0个 slot 以及第0个 epoch 也是可以的).
+卡尔达诺结算层中的时间会以 epochs 划分。epochs 又会以 slots 划分。 Epochs 和 slots 会被编号。 因此，slot `(3,5)` 被读作『第3个 epochs 的第5个 slot』 (第0个 slot 以及第0个 epoch 也是可以的).
 
-卡尔达诺清算层会使用一些常量集, 特殊值定义在
+卡尔达诺结算层会使用一些常量集, 特殊值定义在
 [`constants.yaml` 配置文件中](https://github.com/input-output-hk/cardano-sl/blob/bf5dd592b7bf77a68bf71314718dc7a8d5cc8877/core/constants.yaml)。
 主要有两种：生产模式和开发模式。 在本指南中，我们将参考生产常量。
 
-假设卡尔达诺清算层的值是：:
+假设卡尔达诺结算层的值是：:
 
 -   slot 持续时间: 120秒,
 -   安全参数 *k*: 60.
@@ -38,7 +38,7 @@ children: technical
 
 在 epoch 中，节点之间相互发送 MPC 消息，以达成共识，谁将被允许在下一个时期生成区块。Data 消息中的有效载荷 （以及事务）会被包含在块中。
 
-一个地址持有的货币（或『股份』）越多，被选择生成一个区块的可能性就越大。请阅读 [Ouroboros 权益证明算法](/cardano/proof-of-stake/)获取更多细节。
+一个地址持有的货币（或『股份』）越多，被选择生成一个区块的可能性就越大。请阅读 [乌洛波罗斯 权益证明算法](/cardano/proof-of-stake/)获取更多细节。
 
 
 简而言之:
@@ -77,7 +77,7 @@ children: technical
 
 ## 权益证明
 
-卡尔达诺清算层的核心基于 Ouroboros 权益证明算法。正如同名的[白皮书](https://eprint.iacr.org/2016/889)所描述的那样。
+卡尔达诺结算层的核心基于 乌洛波罗斯 权益证明算法。正如同名的[白皮书](https://eprint.iacr.org/2016/889)所描述的那样。
 
 
 ## 分叉
@@ -174,7 +174,7 @@ have been already received once get ignored.
 
 ### Leaders and rich men computation (LRC)
 
-"Slot leaders" and "rich men" are two important notions of Ouroboros Proof of
+"Slot leaders" and "rich men" are two important notions of 乌洛波罗斯 Proof of
 Stake Algorithm.
 
 -   Slot leaders: Slot leaders for the current epoch (for each slot of the
@@ -195,7 +195,7 @@ Rich men are important for other components as well; for instance, Update system
 uses rich men for checking that node can publish update proposal and vote.
 
 There are two ways of computing who the rich men will be: - considering common
-stake - considering delegated stake (Ouroboros provides opportunity to delegate
+stake - considering delegated stake (乌洛波罗斯 provides opportunity to delegate
 own stake to other node, see more in [Delegation
 section](/cardano/differences/#stake-delegation))
 
@@ -204,7 +204,7 @@ Delegation component with common stake.
 
 ## 常量
 
-卡尔达诺清算层使用一些基础常量。他们的值经过了协议原作者和独立安全评论员的讨论，因此强烈推荐可选客户端使用这些常量。 
+卡尔达诺结算层使用一些基础常量。他们的值经过了协议原作者和独立安全评论员的讨论，因此强烈推荐可选客户端使用这些常量。 
 
 这些常量在 
 [`constants.yaml` 配置文件](https://github.com/input-output-hk/cardano-sl/blob/bf5dd592b7bf77a68bf71314718dc7a8d5cc8877/core/constants.yaml)

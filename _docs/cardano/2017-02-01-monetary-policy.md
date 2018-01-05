@@ -10,42 +10,49 @@ group: cardano
 
 <div style="border-radius:5px;padding:5px 10px;background: #cdeffc;" markdown="1">
 
-### ADA AVAILABLE AT THE LAUNCH OF THE CARDANO PROTOCOL
+### ADA 币在卡尔达诺协议发布时发行
 
-25,927,070,538 Ada were sold during the sale. An amount equal to 20% of the Ada Vouchers sold during the sale period, 5,185,414,108, Ada were generated and distributed to three entities of the Cardano ecosystem that are part of the Technical and Business Development Pool: [IOHK](https://iohk.io), [Emurgo](http://emurgo.io/) and the [Cardano Foundation](https://cardanofoundation.org/). The total amount of Ada available at Launch will therefore be equal to 31,112,484,646 ADA.
+出售期间卖出了 25,927,070,538 个 Ada 币。5,185,414,108 个 ADA 币，相当于所售 ADA 数量的 20%，生成并分发给组成卡尔达诺技术和业务生态系统的三个实体：[IOHK](https://iohk.io), [Emurgo](http://emurgo.io/) 以及 [卡尔达诺基金会](https://cardanofoundation.org/)。因此 ADA 发布时的总量是 31,112,484,646 个。
 
-### ADA SUPPLY CAP
-Ada is capped at an arbitrary 45,000,000,000 or forty-five billion Ada.
+### ADA 供给量
+Ada 币以 45,000,000,000 或者说 450 亿封顶。
 
-### ADA TO BE ISSUED DURING THE OPERATION OF THE CARDANO PROTOCOL
-The remaining Ada, 13,887,515,354, will be issued after launch through ‘minting’.
 
-### There will never be more than 45,000,000,000 ADA
+### 卡尔达诺协议运行期间发行的 ADA 币
+
+剩余的 13,887,515,354 个 ADA 币，将在铸币的过程中发行。
+
+
+### ADA 的数量永远不会超过 45,000,000,000
 </div>
 
 
-## TREASURY AND FEES
+## 财政和费用
 <div style="border-radius:5px;padding:5px 10px;background: #cdeffc;" markdown="1">
 
-### BOOTSTRAP ERA (LAUNCH)
-Cardano is currently in its bootstrapping phase. During this phase, fees are not being collected and no Ada is being minted. Fees from this phase will be collected in the future and they will be destroyed.
+### 启动阶段 (发行)
 
-### TREASURY
-Cardano will have a treasury. The treasury will be endowed via some portion (yet to be decided) of newly minted Ada and transaction fees. The treasury shall be governed by Ada holders.
+卡尔达诺正处于启动阶段。在这个阶段，交易费没有被收集起来，没有 ADA 被铸造。这一时期的费用会在未来被收集然后他们就会被销毁。
 
-### FEE (Current Calculation)
-Minimal fee = 0.155381 ADA + 0.000043946 (ADA/Byte) x size-of-transaction
 
-Fee calculations and incentives are still an area of research under progress.
+### 国库
 
-### DENOMINATIONS
+卡尔达诺将有一个国库。这个国库由部分（还没决定）新铸造的 ADA 币以及转账费用捐赠。国库为 ADA 持有者所有。
+
+### 费用 (当前计算方式)
+
+最小费用 = 0.155381 ADA + 0.000043946 (ADA/字节) x 转账数据大小
+
+费用计算和激励措施仍在研究中。
+
+
+### 面额
 - 1 ADA = 1,000,000 Lovelaces
 - 1 Lovelace = 1/1,000,000 Ada
-- Ada has six decimal places.
+- Ada 有6个小数点
 - 1.000000 = 1 Ada
 - 0.000001 = 1 Lovelace
 
-In terms of money units there are two points of consideration. First in Japan, yen amounts are much larger, 10,000 yen is like the 100 dollar bill and factoring this into the units you go from 25 billion Ada to 250 million. Second Ada has six digits from the decimal not eight for Bitcoin. An Ada is a million Lovelaces (the smallest unit). Adjusting for this takes you to 2.5 million.
-
+在货币单位方面有两点考虑。首先在日本，日元面额要大得多，10000 日元相当于 100美元，相当于250亿 ADA 对应 两亿五千万。第二点，与比特币的8位小数不同，ADA 有6位小数，一个 ADA 有100万个 Lovelaces（最小单位）。Adjusting for this takes you to 2.5 million.
 
 </div>

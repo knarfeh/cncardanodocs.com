@@ -5,65 +5,58 @@ permalink: /cardano/transaction-fees/
 group: cardano
 ---
 
-# Transaction Fees in Cardano SL
+# 卡尔达诺结算层的转账费用
 
-## Motivation
+## 驱动力
 
-There are two main reasons why transaction fees are needed for Cardano SL:
+卡尔达诺结算层需要交易费主要因为两个原因：
 
-1.  People who run full Cardano SL nodes spend time, money and effort to run the protocol, for which they should
-    be compensated and rewarded. In contrast to Bitcoin, where new currency is created with each mined block,
-    in Cardano SL, transaction fees are the only source of income for participants in the protocol.
-2.  The second reason is the prevention of DDoS (Distributed Denial of Service) attacks. In a DDoS attack, an attacker
-    tries to flood the network with dummy transactions, and if he has to pay a sufficiently high fee for each of those
-    dummy transactions, this form of attack will become prohibitively expensive for him.
+1. 人们运行卡尔达诺结算层完整节点，需要花费时间、金钱和经历来运行协议，为此他们应得到补偿和奖励。在卡尔达诺结算层中与比特币不同的是，当新货币在每个区块被挖出时，交易费用是协议参与者的唯一收入来源。
 
-## How transaction fees work
+2. 第二个原因是为了防 DDoS（分布式拒绝服务攻击）。在 DDoS 攻击者，攻击者尝试用虚假交易来冲击网络，如果他必须为每个虚假交易支付足够高的费用，这种攻击形式对于他来说就过于昂贵了。
 
-Whenever somebody wants to transfer an amount of Ada, some minimal fees are computed for that transaction. In order for
-the transaction to be valid, these minimal fees have to be included, although the sender is free to pay higher fees if
-he so wishes.
 
-Please also read about transaction distribution [below](#transaction-fees-distribution).
+## 交易费用如何运作
 
-## Minimal transaction fees
+每当有人想要转移一定数量的 Ada，这笔转账就会有一个最低的转账费。如果想让这个交易有效，必须包含这笔很小的费用，尽管发送者可以选择支付更高的费用。
 
-The minimal fees for a transaction are calculated according to the formula:
+请阅读[下面](#transaction-fees-distribution)的交易分配方式。
+
+
+## 最低转账费
+
+一笔转账的最低费用通过下面的公式计算：
+
 
 ```
 a + b × size
 ```
 
-where:
+其中:
 
-*  `a` is a special constant, at the moment it is 0.155381 ADA;
-*  `b` is a special constant, at the moment it is 0.000043946 ADA/byte;
-*  `size` is the size of the transaction in bytes.
+* `a` 是一个特殊常量，目前是 0.155381 ADA;
+* `b` 是一个特殊常量，目前是 0.000043946 ADA/byte;
+* `size` 是以字节为单位的转账数据大小
 
-This means that each transaction costs at least 0.155381 ADA, with an additional cost of 0.000043946 ADA per byte of
-transaction size. For example, a transaction of size 200 bytes (a fairly typical size) costs:
+
+这意味着每笔交易至少需要 0.155381 ADA, 每字节的交易需要额外的 0.000043946 ADA。例如，大小为200字节（相当典型的大小）的转账费用是：
 
 ```
 0.155381 ADA + 0.000043946 ADA/byte × 200 byte = 0.1641702 ADA.
 ```
 
-The reason for having parameter `a` is the prevention of DDoS attacks mentioned above: even a very small dummy
-transaction should cost enough to hurt an attacker who tries to generate many thousands of them.
+有参数 `a` 的原因是为了防止上面提到的 DDoS 攻击：即使是非常小的虚假交易也要花费足够的代价，以此来防止试图产生成千上万交易的攻击者。
 
-Parameter `b` has been introduced to reflect actual costs: storing larger transactions needs more computer memory
-than storing smaller transactions, so larger transactions should be more expensive than smaller ones.
+引入参数 `b` 用来反映实际成本：存储更大的交易比存储更小的交易需要更多计算机内存，因此数据量更大的交易应该比数据量小的交易收费更贵。
 
-Although particular values for parameters `a` and `b` were calculated, these values will probably be adjusted in
-future to better reflect actual costs.
+虽然是通过特定参数 `a` 和 `b` 计算的，这些值可能会在未来进行调整，以更好地反映实际成本。
 
-## Transaction fees distribution
+## 交易分配方式
 
-All transaction fees of a given [epoch](https://cardanodocs.com/glossary/#epoch) are collected in a virtual pool,
-and the idea is to then redistribute the money from that pool amongst people who were elected [slot leaders](https://cardanodocs.com/glossary/#slot-leader)
-by the PoS-algorithm during that epoch and who created blocks.
+在一个特定 [epoch](http://cncardanodocs.com/glossary/#epoch) 中产生的交易费用会被收集到一个虚拟池里，然后将这个池里的资金重新分配给由 PoS 算法选举的那些 [slot 领导者](https://cncardanodocs.com/glossary/#slot-leader)。
 
-At this stage of Cardano SL, where all blocks are created by nodes operated by IOHK and our partners, fees are
-already collected (to prevent DDoS attacks), but they will not be distributed and instead will be burnt.
+在卡尔达诺结算层这个阶段，所有的区块都是有 IOHK 以及我们的合作伙伴运行的节点创建的，收集了费用（为了防止 DDoS 攻击），但它们不会被重新分配，而是被销毁。
 
-As soon as Cardano SL enters its next, [fully decentralized stage](https://cardanoroadmap.com/), fees will be
-distributed as described above.
+
+不久，卡尔达诺结算层进入下一个阶段，[完全分布式阶段](https://cardanoroadmap.com/)后，费用会按如上所述分配。
+

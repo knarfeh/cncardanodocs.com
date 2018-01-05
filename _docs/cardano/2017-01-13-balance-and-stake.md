@@ -1,6 +1,6 @@
 ---
 layout: default
-title: 平衡和股份
+title: 余额和份额
 permalink: /cardano/balance-and-stake/
 group: cardano
 ---

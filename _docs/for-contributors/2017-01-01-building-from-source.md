@@ -1,6 +1,6 @@
 ---
 layout: default
-title: 从源码构建卡尔达诺清算层
+title: 从源码构建卡尔达诺结算层
 permalink: /for-contributors/building-from-source/
 group: for-contributors
 ---
