@@ -10,28 +10,22 @@ group: cardano
 
 ## 概要
 
-A transaction (*tx*) is a special data which represents the *act* of the value
-transferring between nodes (from the user's point of view, transferring between
-wallets). Thus, when the user *Alice* sends money to the user *Bob*, the new
-transaction emerges. Let's call this transaction `Tx1`, the node under *Alice*'
-wallet `N1`, and the node under *Bob*'s wallet `N2`.
+一个交易（**tx**) 是一组特殊的数据，代表着节点间价值转移的*行为*（从用户的角度来看就是钱包之间价值的转移）。因此，当用户 Alice 汇款给 用户 Bob 时，新的交易就产生了。
+让我们称该交易为 `Tx1`，Alice 钱包下的节点称为 `N1`，Bob 钱包下的节点称为 `N2`。
 
-Thus, the node `N1` does the following steps:
+节点 `N1` 会执行下面的步骤：
 
-1.  Creating transaction `Tx1` and signs it with its private key.
-2.  Sending it to all known nodes (i.e. neighbors).
-3.  Saving it in its local data.
+* 创建一个 `Tx1` 交易然后用自己的私钥给交易签名
+* 将交易发送给所有节点（也就是相邻节点）
+* 将该交易保存到本地的数据中
 
-Each of `N1`'s neighbors sends `Tx1` transaction to its neighbors and so on, and
-some slot leader will store this transaction in some block in the ledger. Please
-note that if the network is under high load, it may take a lot of time for
-transaction to be actually added to the block.
+`N1` 的每个相邻节点也会将 `Tx1` 发送给自己相邻的节点，一次类推。然后某个领导者会将该笔交易放入到账本中的某个区块里面。请注意，如果网络处于高负荷状态，可能需要很长的时间才能让交易真正的加入到某个区块中。
 
 ## 设计
 
-Each transaction contains a list of *inputs* and a list of *outputs*; outputs of
-the transaction `Tx0` can be used as inputs of the other transaction `Tx1`, and
-so on:
+
+每个交易都包含了一系列的*输入*和一系列的*输出*；交易 `Tx0` 的输出可以被当用来当做其他如 `Tx1` 交易的输入，以此类推：
+
 
                 Tx0                           Tx1
       +----------------------+      +----------------------+
@@ -49,28 +43,22 @@ so on:
       |                      |      |                      |
       +----------------------+      +----------------------+     ...
 
-Inputs and outputs carry information about *money flow*: inputs inform where the
-money came from, and outputs inform where the money come to. Please notice that
-there's `N` and `M`, because the actual number of inputs and outputs can be
-different.
+输入和输出携带着金钱走向的信息：输入告知金钱是从哪里来的，输出告知金钱往哪里去。请注意上面有 N 和 M，是因为实际的情况输入和输出的个数可能并不相同。
 
-Thus, each input contains:
+每个输入包括：
 
-1.  An ID of transaction `TxN`, whose output is used for this input. Transaction
-    ID is a BLAKE2b-256 hash of the transaction, something like
-    `f9bcbe752aee4512457f1fd350200cf870906b7e6e836688c9a3779645c86c01`.
-2.  An index of the using output in `TxN`'s outputs.
+* 交易 `TxN` 的 ID，`TxN` 的输出就是该输入（每笔交易的输出就是另一笔交易的输入）。交易 ID 是一个 BLAKE2b-256 哈希值，就像这样：`f9bcbe752aee4512457f1fd350200cf870906b7e6e836688c9a3779645c86c01`。  
+* 在 `TxN` 的输出中使用的输出的索引。  
 
-Each output contains:
 
-1.  An address of the node `N` we want to send a value to. An address is a
-    BLAKE2b-224 hash of the hash of the public key of the `N` node, something
-    like `1fsAhhf4E1LQDB8agSds8teuD4E7U8JsRESngEX52kinBhi`. Please read about
-    [Addresses in Cardano SL](/cardano/addresses/) for more info.
-2.  Amount of money we want to send. This value is 64-bit unsigned integer with
-    maximum value `45000000000000000`.
+每个输出包括：
 
-For example:
+* 节点 `N` 的地址，该节点就是我们想要发送价值给它的节点。一个地址就是节点 `N` 的公钥的 BLAKE2b-224 哈希值，大概像这样：`1fsAhhf4E1LQDB8agSds8teuD4E7U8JsRESngEX52kinBhi`。请阅读[卡尔达诺结算层的地址](/cardano/addresses/)来获取更多信息。
+* 我们想要汇款的金额。这是一个64位，无符号的整形数字，最大值为 `45000000000000000`
+
+例如：
+
+
 
       Tx 891971a4cc31e32..                           Tx f9bcbe752aee4512..
     ------------------------+           +----------------------------------------------+
@@ -90,87 +78,48 @@ For example:
     /                       |           |                                              |
     ------------------------+           +----------------------------------------------+
 
-Node `a00e4bb2..` generates transaction `f9bcbe752aee4512..`, and this
-transaction informs us that:
 
-1.  We want to send 100 ADA from the current node with address `a00e4bb2..` to
-    the node with address `88ca7f79..`.
-2.  This money corresponds to `0`th output of the previous transaction with an
-    ID `891971a4c..`.
+节点 `a00e4bb2..` 生成交易 `f9bcbe752aee4512..`，这笔交易告诉我们：
 
-## Verification
+1. 我们想要从地址为 `a00e4bb2..` 的当前节点发送100 ADA 到地址 `88ca7f79..` 节点。  
+2. 这笔钱对应上笔 ID 为 `891971a4c..` 的交易的第 0 个输出
 
-As mentioned above, the transaction's output becomes the input of the other
-transaction. In this case we treat such output as *spent transaction output*.
-Thus, an output `Out0` of the transaction `891971a4cc31e32..` is a spent output,
-because it already is an input of the `f9bcbe752aee4512..` transaction.
 
-But such spendings do not occur immediately, so an output that *isn't yet* an
-input of another transaction is called an *unspent transaction output*. Only
-unspent outputs can be used as inputs for other transactions, to prevent
-[double-spending](https://en.bitcoin.it/wiki/Double-spending).
+## 验证
 
-So every node in the network not only accepts transactions, but also
-verifies them. To do it, every node have to keep track of unspent outputs, it
-allows to validate that inputs in a published transaction are indeed the unspent
-outputs. Actually, all unspent outputs called *utxo*, and this is a part of the
-special key-value database called *Global State*.
+如上所述，一笔交易的输出会变成另一笔交易的输入。在这种情况下，我们把交易输出称为*成交的交易输出*。因为它已经是交易 `f9bcbe752aee4512..` 的输入。
 
-## Proofs of Transaction Legitimacy
+但这种成交不会立刻发生，一个*还未*成为其他交易输入的输出称为 *未成交的交易输出*。为了防止[双重支付](https://en.bitcoin.it/wiki/Double-spending)，只有未成交的输出才能被用来当做其他交易的输入。
 
-Each transaction in Cardano SL is accompanied by a proof (also called a **witness**)
-that this transaction is legitimate. Even if the output is an unspent one, we
-have to prove that we have *a right* to spend it. Since a `TxN` transaction can
-have many inputs, the witness for it consists of the witnesses of all `TxN`'s
-inputs, and only if all the inputs are legitimate, `TxN` is legitimate too. If a
-particular transaction isn't legitimate, it will be rejected by the network.
+因此在网络中的每个节点不仅仅接收交易，还会验证它们。为了验证交易，每个节点都必须保持对未成交输出的跟踪，这样就可以验证发布的交易中的输入是未成交的输出。所有未成交的输出叫做 *utxo*，它也是一个被称为*全球状态*的特殊键值数据库的一部分。
 
-Because of [two available types of node
-address](/cardano/addresses/#what-does-an-address-look-like) we use two
-corresponding versions of the witness: based on *public key* and based on
-*script*.
 
-For example, the first option works with a public key `PK` and a transaction
-signature: legitimate input must be signed with a private key corresponding to `PK`.
-So it's possible to check this signature and either accept that input or reject it.
+## 交易合法性的证明
 
-Witnesses are stored in the blockchain and anybody can see, inspect and
-independently verify them. But after some time a node may delete old proofs in
-order to save space. The technique of storing transactions separately from their
-proofs is called "segregated witness" (you may have heard of it being recently
-[implemented in
-Bitcoin](https://bitcoincore.org/en/2016/01/26/segwit-benefits/)). Under this
-scheme, transactions and proofs are stored in two separate places in a block,
-and can be processed independently.
+在卡尔达诺结算层中的每笔交易都有一个证明（也叫做见证）来表明这笔交易是合法的。即使一个输出是一个未成交的输出，我们也应该有权来让它成交。由于一个 `TxN` 交易可以有多个输入，那么它的见证就包含了 `TxN` 中所有输入的见证，如果所有的输入都是合法的，`TxN` 就是合法的。如果某个交易不是合法的，那么网络就会拒绝这笔交易。
 
-## Stake Distribution
+因为有[两种可用的节点地址类型](/cardano/addresses/#what-does-an-address-look-like)，所以我们使用两种对应版本进行验证：基于公钥的和基于脚本的。
 
-Stake distribution is another part of Cardano SL, not directly related to delegation,
-but one we can exploit for its benefit.
+例如，基于公钥的验证使用公钥 `PK` 和交易签名：合法的输入必须使用与 `PK` 相对应的私钥进行签名。以此来检查这个签名是被接收了还是被拒绝了。
 
-Some addresses have multiple owners, which poses a problem of stake computation as per
-Follow-the-Satoshi each coin should only be counted once towards each stakeholder's stake total.
-Unlike balance (real amount of coins on the balance), stake gives user power to control different
-algorithm parts: being the slot leader, voting in Update system, taking part in MPC/SSC.
+验证被存储在区块链中，每个人都可以看见，可以查看，单独验证。但经过一段时间后，节点为了节省空间可能会删除老的证明。分开存储交易和证明被称为『隔离见证』（你可能听到过它，最近在[比特币中实现](https://bitcoincore.org/en/2016/01/26/segwit-benefits/)了）。在这种策略下，交易和证明被存储在两个不同的地方，并且可以独立地进行处理。
 
-Stake distribution is a value associated with each address. Technically stake distribution is a value
-which is a part of address' attributes. This value corresponds to one of three different cases:
 
-1.  Bootstrap era distribution. This is a special value which is mandatory in Bootstrap era, but it can be used
-    after Bootstrap era as well.
-2.  Single key distribution, which means that all stake will go to the given stakeholder.
-    In this case distribution contains stakeholder's identifier.
-3.  Multiple key distribution, which means that stake will go to the multiple stakeholders (at least two).
-    In this case distribution contains pairs "stakeholder's identifier - portion of an output".
-    Transaction's output has a value, portion of this value is a stake.
+## 权益分配
 
-Stake distributions are considered by both [slot-leader election process](https://cardanodocs.com/technical/leader-selection/)
-and Richmen Computations.
+权益分配是卡尔达诺结算层另一个组成部分，虽然和委派没有直接关系，但都可以通过它来获取相应的利润分红。
 
-This feature can be used in similar way to [delegation](https://cardanodocs.com/technical/delegation/), but there
-are differences:
+有些地址有多个拥有者，这也产生了一个权益计算的问题。因为追随中本聪算法的每个币对于每个股东的总权益而言只能计数一次。与余额（余额中的真实币数）不同，权益赋予用户控制算法不同部分的权利：成为领导者、投票更新系统、参加 MPC/SSC。
 
-1.  There is no certificate(s): to revoke stake delegation `A` has to move funds, providing
-    different stake distribution.
-2.  The portion of `A`'s stake can be delegated via distribution. On the contrary, delegation
-    requires you to delegate all funds of whole address at once.
+权益分配关联了每个地址的值。技术上来说该值是地址属性的一部分，该值对应于下面三种情况的某一种：
+
+1. Bootstrap 时代分配。这是一个特殊的值，它是 Bootstrap 时代里的受托者，但是它在 Bootstrap 时代之后还可以使用。 
+2. 单密钥分配，这是指所有的权益会被分配给一个指定的股东。在这种分配情况下会包含股东的身份。
+3。 多个密钥分配，这是指权益会被分配给多个股东（至少两个）。在这种分配情况下包含了一对『股东身份-输出部分』的信息。交易的输出有一个值，该值的一部分就是权益。
+
+[领导者选举过程](https://cardanodocs.com/technical/leader-selection/)和富人计算两者都考虑了权益分配。
+
+这个特性可以以类似的方式用在[委派](https://cardanodocs.com/technical/delegation/)中，但是有点区别：
+
+1. 没有凭证。要撤销委派 `A` 必须移动资金，提供不同的权益分配。  
+2. `A` 的部分权益可以通过分配来委托。相反的是，委托需要你同时委托全部地址的资金。

@@ -7,11 +7,13 @@ visible: true
 ---
 <!-- Reviewed at e1d0f9fb37a3f1378341716916f0321fb55698df -->
 
-# Leader Selection in Cardano SL
+# 卡尔达诺结算层中的领导者选举
 
-This chapter describes [slot-leader](/glossary/#slot-leader) selection process.
+这一章描述[领导者](/glossary/#slot-leader)选举过程。
 
-## Follow the Satoshi
+## 追随中本聪算法
+
+如[前](/cardano/proof-of-stake/#follow-the-satoshi)所述，卡尔达诺结算层使用追随中本聪算法（FTS）来选择领导者
 
 As mentioned [earlier](/cardano/proof-of-stake/#follow-the-satoshi), Cardano SL
 uses Follow the Satoshi (FTS) algorithm to choose slot leaders. Leaders for

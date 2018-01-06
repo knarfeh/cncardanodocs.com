@@ -1,6 +1,6 @@
 ---
 layout: default
-title: 乌洛波罗斯 权益证明算法
+title: 乌洛波罗斯权益证明算法
 permalink: /cardano/proof-of-stake/
 group: cardano
 visible: true
@@ -133,7 +133,9 @@ Then elector verifies that commitments and openings are match, and if so, he ext
 secrets from commitment and forms a seed from these secrets. So all electors get the same
 seed, and it will be used for Follow the Satoshi algorithm.
 
-### Follow the Satoshi
+### 追随中本聪
+
+
 
 After electors get the seed (randomness we need), they have to select particular slot leaders for
 the next epoch. This is where Follow the Satoshi (FTS) algorithm came in. It can be shown like

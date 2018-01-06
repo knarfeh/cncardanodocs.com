@@ -15,105 +15,72 @@ group: cardano
 3. 兑换地址
 
 
+公钥地址在就像其他的加密货币一样，是个正常的，经过哈希的公钥。
 
-To send and receive value, addresses are used in virtually all cryptocurrencies.
-Cardano SL supports 3 main types of addresses:
+脚本地址被用在一个称为『支付脚本 Hash』（P2SH）的交易中。它会自动运作，就像银行里的存款一样：你可以向它汇款，但为了兑换这笔钱你必须满足一些特定的条件，条件由于地址相关的脚本决定。地址本身包含着序列化脚本的哈希值。请阅读下面的 [P2SH](#pay-to-script-hash) 获取更多信息。
 
-1.  public key address,
-2.  script address,
-3.  redeem address.
+赎回地址是 ADA 赎回的一种特殊地址类型。
 
-Public key address is a normal address like in any other cryptocurrency. It is
-a hashed public key. Read more about public key addresses [below](#public-key-addresses).
+不仅如此，卡尔达诺结算层还支持 `Unknown` 地址类型。这种类型可以允许我们在未来使用自定义的地址类型。
 
-Script addres is used in so-called "Pay to Script Hash" (P2SH) transactions.
-It operates autonomously and acts somewhat like a bank deposit: you can send
-money to it, but in order to redeem it you have to satisfy certain conditions,
-determined by a script associated with the address. The address itself contains
-the hash of the serialized script. Read more about P2SH [below](#pay-to-script-hash).
 
-Redeem address is a special type of address for ADA redemption. Read more about redeem
-addresses [below](#redeem-addresses).
+## 地址看起来像什么？
 
-Moreover, Cardano SL support `Unknown` address type as well. This type will allow us to use
-custom types of addresses in the future.
-
-## What Does an Address Look Like?
-
-Addresses are `base58`-encoded bytestrings, for example:
+地址是 `base58` 编码的字符串，例如：
 
 ```
 Ae2tdPwUPEZKmwoy3AU3cXb5Chnasj6mvVNxV1H11997q3VW5ihbSfQwGpm
 ```
 
-### Encoding
+### 编码
 
-`base58` encoding is the same one as used in Bitcoin. It uses a 58-symbol alphabet
-to encode data, hence the name. Here is the alphabet we are using:
+`base58` 编码也是比特币中使用的编码。它使用 58 个符号的字母表来对数据进行编码，这也是它名字的由来。下面就是我们使用的字母表：
+
 
 ```
 123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz
 ```
 
-It avoids both non-alphanumeric characters and letters which might look
-ambiguous when printed (`0`, `O`, `I`, `l`); therefore it is suitable for human
-users who enter the data manually, copying it from some visual source, and also
-allows easy copy and paste by double-clicking which usually selects the whole
-string.
 
-## Public Key Addresses
+它去除了非字母数字字符和显示时看起来模棱两可的字母（`0`, `O`, `I`, `l`）；因此它适用于手动输入数据，从可视化的源代码复制数据的普通用户，并且允许通过双击来简单的拷贝和粘贴，不过双击通常会选择整个字符串。
 
-As mentioned in the [Introduction](/introduction/#you-own-your-money), the wallets
-you can see in the user interface are a convenient representation of the fact that
-you own a secret key to spend money in this particular wallet. But how is such
-spending verified by the network and how can you receive money from others? The
-answer is that along with the secret key which is used to control the value in
-your wallets, a public key is generated. This public component can be known by
-anybody, hence the name.
 
-A public key address contains the hash of this public key.
+## 公钥地址
 
-Public keys are also used for verifying your identity when your create a
-transaction and other auxiliary purposes.
+就像[介绍](/introduction/#you-own-your-money)章节提到的，在用户界面你看到钱包就代表着在这个特定的钱包中你拥有可以花费这笔钱的私钥。但是这样的花销是如何被网络验证，你又如何接收到别人支付给你的钱呢？答案就是跟控制你钱包价值的私钥一起产生的一个公钥。这个公共的部分即指可以被任何人知道，因此叫做『公钥』。
 
-## Pay to Script Hash
+一个公钥的地址包含了公钥的哈希值。
 
-The idea of Pay to Script Hash (P2SH) is to provide a lot of flexibility for
-formulating complex rules for spending money. Instead of sending a transaction
-to a public key address, we create a validator script that can take a so-called
-redemption script as a parameter. To redeem funds, we pass the redemption script
-to the validator and evaluate it. If it evaluates to `success`, money is sent as
-specified by the redeemer. Otherwise nothing happens.
+公钥同时用来在你创建一个交易或其他辅助用途的时候验证你的身份。
 
-To quote Bitcoin Wiki,
 
-> Using P2SH, you can send bitcoins to an address that is secured in various
-> unusual ways without knowing anything about the details of how the security is
-> set up. The recipient might need the signatures of several people to spend
-> these bitcoins, or a password might be required, or the requirements could be
-> completely unique.
+## P2SH
 
-## Redeem Addresses
 
-Redeem addresses are Pay To PubKey Hash (P2PKH). Such an address contains the hash
-of redeem public key, and this key is actually [Ed25519](http://ed25519.cr.yp.to/)
-public key.
+P2SH 的思想是为花费制定复杂的规则提供很大的灵活性。与发送一笔交易到公钥地址不同，我们创建一个验证脚本，该脚本使用赎回脚本当做参数。为了赎回里面的资金，我们发送一个赎回请求给验证器，然后开始计算。如果计算结果是 `success`, 前就会被汇到指定的赎回者那里，否则的话什么都不会发生。
 
-## Other Address Types
+引用一下比特币 WiKi：
 
-In the future, we may use the update system to introduce other address types. Please
-[see more](/cardano/update-mechanism/#soft-fork-updates) on extending the system in
-non-breaking fashion.
+> 使用 P2SH，你可以将比特币打给一个用多种不常见的方法保护着的地址，不用知道关于该地址安全设置的任何详细信息。接收者可能需要多个人的签名，或一个密码，或一个非常独特的要求才能使用这些比特币。
 
-## Address Structure
 
-Address consists of 3 parts:
+## 赎回地址
 
-*  address root,
-*  address attributes,
-*  address type.
+赎回地址就是 P2PKH。这样的地址包含了赎回公钥的哈希值，并且这个钥匙是 [Ed25519](http://ed25519.cr.yp.to/) 公钥。
 
-We can imagine an address as a JSON-like structure, for example:
+## 其他地址类型
+
+在未来，我们可能会用升级的系统来引入其他地址类型。请阅读 [查看更多](/cardano/update-mechanism/#soft-fork-updates) 来了解以无缝升级的方式来扩展系统的相关信息。
+
+## 地址结构
+
+地址由三部分组成
+
+* 地址跟
+* 地址属性
+* 地址类型
+
+我们可以把地址想象成类似 JSON 的结构，例如：
 
 ```
 Address {
@@ -128,36 +95,34 @@ Address {
 }
 ```
 
-`addrRoot` is the BLAKE2b-224 hash of the tuple made from `addrType`, `addrSpendingData` and `addrAttributes`.
+`addrRoot` 是由 `addrType`、`addrSpendingData`、`addrAttributes` 组成数组的 BLAKE2b-224 哈希值。
 
-`addrSpendingData is a special value which is bound to an address and must be revealed in order to spend coins belonging to
-this address. For example, for public key address this value contains the public key. In this case it is impossible to change
-address attributes without knowing of the public key because if the attributes have been changed the whole address becomes
-invalid.
 
-`addrAttributes` include important attributes of each address: derivation path and stake distribution.
+addrSpendingData 是一个与地址绑定的特殊值，消费在这个地址的币必须是被公开的。例如，对于公钥来说，这个值就包含着公钥。这样一来，在不知道公钥的时候不可能改变地址属性，因为如果属性改变了，整个地址就变成无效的了。
 
-For more info about derivation path please read [HD Wallets in Cardano SL](https://cardanodocs.com/technical/hd-wallets/) chapter.
+`addrAttributes` 包含了每个地址重要的属性：衍生的路径和权益的分配。
 
-For more info about stake distribution please read [Transactions in Cardano SL](https://cardanodocs.com/cardano/transactions/#stake-distribution)
-chapter.
+想要了解更多关于衍生路径的内容请阅读 [卡尔达诺结算层的 HD 钱包](https://cardanodocs.com/technical/hd-wallets/) 章节。
 
-Value of `addrType` corresponds to address type as was mentioned above, in this example it is a public key address.
+想要了解更多关于权益分配的内容请阅读 [卡尔达诺结算层的转账](https://cardanodocs.com/cardano/transactions/#stake-distribution) 章节。
 
-### Length
+`addrType` 的值与上面提到的地址类型相对应，在上面的例子中它是一个公钥地址。
 
-Addresses may have different lengths depending on address type and additional data in it.
+### 长度
 
-For example, this address
+地址的长度可能是不同的，地址长度与地址类型和附加数据有关。
+
+例如这个地址：
+
 
 ```
 Ae2tdPwUPEZKmwoy3AU3cXb5Chnasj6mvVNxV1H11997q3VW5ihbSfQwGpm
 ```
 
-and this one
+以及这个地址：
 
 ```
 4swhHtxKapQbj3TZEipgtp7NQzcRWDYqCxXYoPQWjGyHmhxS1w1TjUEszCQT1sQucGwmPQMYdv1FYs3d51KgoubviPBf
 ```
 
-are both public key addresses.
+都是公钥地址。

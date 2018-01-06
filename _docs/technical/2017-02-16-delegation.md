@@ -9,6 +9,10 @@ visible: true
 
 # 卡尔达诺结算层股权委派
 
+这一章描述权益委托过程的实现细节。
+
+
+
 This chapter describes implementation details of the stake delegation process.
 
 As described earlier, stakeholders selected as slot leaders must be online in
