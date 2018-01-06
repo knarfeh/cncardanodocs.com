@@ -13,12 +13,8 @@ children: dsa
 <!-- CARDANO_SL_README_BEGIN_3 -->
 ## 支持的平台
 
-Supported platforms are Windows, macOS and Linux. There are
-[installers for Windows and macOS](https://daedaluswallet.io/#download),
-which include a main node and [Daedalus wallet](https://github.com/input-output-hk/daedalus).
+支持的平台包括 Windows, macOS 和 Linux。这是[代达罗斯钱包](https://github.com/input-output-hk/daedalus)的 [Windows 和 macOS 平台安装器](https://daedaluswallet.io/#download)。
 
-Linux installer is going to be released soon. For now, to
-get Cardano SL on Linux, please refer to the [How to Build Cardano SL and Daedalus from
-Source Code](https://github.com/input-output-hk/cardano-sl/blob/develop/docs/how-to/build-cardano-sl-and-daedalus-from-source-code.md)
-manual.
+Linux 平台的安装器将在不久发布。目前来说，在 Linux 上运行卡尔达诺结算层，可以参考 [如何通过源代码构建卡尔达诺结算层以及代达罗斯钱包](https://github.com/input-output-hk/cardano-sl/blob/develop/docs/how-to/build-cardano-sl-and-daedalus-from-source-code.md)文档
+
 <!-- CARDANO_SL_README_END_3 -->

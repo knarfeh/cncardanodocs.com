@@ -96,19 +96,14 @@ Slot 领导者从所有的 stakeholders 中选举。请注意并不是所有的 
 
 我们用多方计算（multiparty computation (MPC) ）方法：每个选民独立进行一次『投硬币』的行为，然后与其他选民分享结果。这个想法就是：结果由每个选民随机产生，但最终它们在相同的最终价值上达成一致。
 
-#### Commitment Phase
+#### 提交阶段
 
-First of all, elector generates a secret (special random value). Then elector forms a
-“commitment” which is a message that contains encrypted shares (see an explanation below) and
-proof of secret.
+首先，选民会产生一个密钥（特殊的随机值）。接着，选民会形成一个『提交』，这是一个包含加密份额（见下面的解释）以及密码的证明的消息。
 
-Then elector signs this commitment with its secret key, specifies epoch's number and attaches
-its public key. In this case everybody can check who created this commitment and which epoch
-this commitment is for.
+然后选民会用密钥来签署这个提交，指定 epoch 编号，附上它的公钥。在这种情况下，每个人都可以知道谁创建了这个提交，以及这个提交属于哪个 epoch。
 
-After that elector sends its commitment to other electors, so eventually each elector collects
-commitments from all other electors. Please note that commitments are put into block, i.e.
-they become a part of the blockchain.
+随后，选民会将其提交交给其他选民，最终每个选民都会拿到其他选民的提交。请注意，这些提交将被放入区块中，也就是说它们将成为区块链的一部分。
+
 
 #### Reveal Phase
 
@@ -134,7 +129,6 @@ secrets from commitment and forms a seed from these secrets. So all electors get
 seed, and it will be used for Follow the Satoshi algorithm.
 
 ### 追随中本聪
-
 
 
 After electors get the seed (randomness we need), they have to select particular slot leaders for

@@ -2,6 +2,7 @@
 layout: default
 title: 中文翻译说明
 permalink: /中文翻译说明/
+description: 这是卡尔达诺结算层（Cardano SL）中文文档
 group: base
 ---
 
