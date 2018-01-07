@@ -13,7 +13,6 @@ visible: true
 
 
 
-This chapter describes implementation details of the stake delegation process.
 
 As described earlier, stakeholders selected as slot leaders must be online in
 order to generate new blocks. However, such a situation can be unattractive,

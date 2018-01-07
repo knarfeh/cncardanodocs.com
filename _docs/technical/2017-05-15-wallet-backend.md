@@ -9,13 +9,14 @@ visible: true
 
 # 卡尔达诺结算层钱包后端
 
-While addresses discussed in [Addresses](/cardano/addresses/) section are
-fundamental to send and receive funds, wallets are a way to simplify these
-processes for end-users.
 
-## What is a Wallet?
+[地址](/cardano/addresses/) 章节讨论的地址是发送和接收资金的基础，而钱包是简化用户最终流程的一种方式。
 
-In Cardano, wallets are defined in the following manner:
+
+## 什么是钱包？
+
+在卡尔达诺中，钱包的定义如下：
+
 
 ``` haskell
 data CWallet = CWallet
@@ -26,17 +27,12 @@ data CWallet = CWallet
     }
 ```
 
-where `CWalletMeta` is a type that presently indicates whether the wallet is
-shared or personal, the currency that this wallet uses, and the wallet's name.
-With this, the wallet type is easily extensible, as any additional features can
-be added to the `CWalletMeta` type, leaving other fields untouched. Every
-wallet, regardless of name, type and currency, must have the said fields.
+其实 `CWalletMeta` 指明当前钱包是共享的还是个人的，钱包使用的货币和钱包的名字。有了这个，钱包类型很容易扩展，因为任何附加的功能可以添加到 `CWalletMeta` 类型，而其他字段不变。每个钱包，无论名称，类型和货币，都必须具有上述字段。
 
-## Transactions and Wallets
+## 交易和钱包
 
-In the [Transactions](/cardano/transactions/) section, the structure of
-transactions is defined. However, to facilitate client operations, transactions
-are represented differently in clients. They are represented as
+在[转账](/cardano/transactions/)章节定义了交易数据的结构。然而，为了方便客户的操作，交易在客户中有不同的表现形式，他们被表示为：
+
 
 ``` haskell
 data CTx = CTx
@@ -49,47 +45,36 @@ data CTx = CTx
     }
 ```
 
-Essentially, a client transaction is composed by the actual transaction `Id`, by
-the amount the wallet in question received, the number of confirmations this
-transaction has received (i.e., the number of blocks that are currently on top
-of the block containing the transaction in question), input and output
-addresses. Meta-information - the datatype `CTxMeta` - indicates the
-transaction's currency, its title or name, its description and the
-POSIX-formatted date of sending it.
 
-## Wallet Backend API
+本质上，一个客户端的转账由实际交易 `Id`，收到的币的数量，交易已得到的确认数（即当前位于包含所述交易区块顶部的区块数量），输入和输出地址。元数据，数据类型 `CTxMeta`，表明交易的货币，标题或名称，描述信息，以及 POSIX 格式的发送日期。
 
-Currently, the wallet's API provides a series of methods to work with wallets.
-The `servant` Haskell library that provides a modular approach to API-building
-is used. This library uses combinators both to build atomic HTTP actions and to
-glue these atomic methods together to form larger and more complete APIs.
 
-Please notice that wallet web API is available only if you run a node with
-`--wallet` option. Default port for this API is `8090` which can be changed with
-the `--wallet-port` option.
+## 钱包后端 API
 
-Documentation for wallet web API is available
-[here](https://cardanodocs.com/technical/wallet/api/).
+目前，钱包 API 提供了一系列使用钱包的方法。Haskell 库 `servant` 提供了一个模块化的 API 构建方法。该库使用组合器来构建院子 HTTP 操作，并将这些原子方法粘合在一起以形成更大和更完整的 API。
 
-### TLS Connections
+请注意，只有当您使用 `--wallet` 选项运行节点时，钱包 Web API 才可用，这个 API 的默认端口 `8090` 可以通过 `--wallet-port` 选项进行更改。
 
-The Wallet Web API uses TLS for secure communication. Calls to the API need
-to send a client CA certificate that was used when launching the node and
-identifies the client as being permitted to invoke the server API.
+钱包 Web API 文档可以在[这里](https://cardanodocs.com/technical/wallet/api/)找到
 
-Note that the client certificate file is the one which was supplied as the
-`--tlsca` option, when launching the node.
 
-For example, If that file is available as `ca.crt`, then a curl call to a node
-running on `localhost:8090` can be made like so -
+### TLS 连接
+
+钱包 Web API 使用 TLS 进行安全通信。调用 API 需要发送客户端 CA 证书，该证书在启动节点时使用，并将客户端标识为允许调用服务器 API。
+
+请注意，客户端证书文件是启动节点时 `--tlsca` 作为选项提供的文件。
+
+例如，如果该文件是可用的 `ca.crt`，那么对于运行节点 `localhost:8090` 调用 curl 命令可以像这样：
+
 
 ``` bash
 curl --cacert ca.crt -v https://localhost:8090/api/settings/sync/progress
 ```
 
-If that request succeeds, then you have configured TLS properly.
+如果该请求成功，那么您已经正确配置了 TLS。
 
-### Handling errors
 
-If the event requests fail, there is a `WalletError` type, which is simply a
-wrapper over `Text` to show what happened.
+### 处理错误
+
+如果事件请求失败，则有一个 `WalletError` 类型，它只包装一个 `Text` 来显示发生了什么。
+

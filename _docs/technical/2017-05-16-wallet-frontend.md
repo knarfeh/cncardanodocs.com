@@ -9,26 +9,21 @@ visible: true
 
 # 卡尔达诺结算层钱包前端
 
-When developing Cardano SL, the need arose for a UI from which users could
-access their funds, send and receive transactions, and perform other tasks
-related to managing a personal cryptocurrency wallet. The Daedalus wallet is the
-Cardano's solution to these necessities.
+卡尔达诺结算层发展时，用户需要一个可以查看资金，发送接收转账，处理其他个人电子货币钱包的任务这样的用户界面，这一需求在增长。代达罗斯钱包是对于这些需求的解决方案。
 
-Currently, it allows a user to use their ADA in the aforementioned actions, and
-providing support for other currencies is planned for the near future — as is
-the exchange between different currencies, both digital and not.
+目前，它允许用户使用上述功能，并计划在不久的将来提供对其他货币的支持，包括电子货币和非电子货币。
 
-## Building Daedalus client API
 
-To run Daedalus client API locally, you have to start [`cardano-sl`](https://github.com/input-output-hk/cardano-sl/)
-with wallet API as follows.
+## 构建代达罗斯客户端 API
 
-Please make sure that you are in the root directory of `cardano-sl` repository.
-Also make sure you have [npm](https://www.npmjs.com/) program.
+要在本地运行代达罗斯客户端 API，您必须按照下面的要求开启 [`cardano-sl`](https://github.com/input-output-hk/cardano-sl/) 的钱包 API。
 
-## Running and testing Daedalus client API
+请确保您在 `cardano-sl` 的根目录。同时确保您已经安装 [npm](https://www.npmjs.com/) 程序。
 
-In order to see Daedalus client API in action, first run a local Cardano SL network:
+
+## 运行和测试代达罗斯客户端 API
+
+为了在操作中看到代达罗斯客户端 API，首先运行一个本地的卡尔达诺结算层网络：
 
 ``` bash
 # run tmux in another window
@@ -37,14 +32,13 @@ $ tmux
 $ ./scripts/launch/demo-with-wallet-api.sh
 ```
 
-By default, this should launch Cardano SL network consisting of 3 nodes talking to
-each other. One node is running wallet API, and it will behave the same as Daedalus
-wallet that is run in production.
+默认情况下，这将启动由3个互连节点组成的尔达诺结算层网络。一个节点运行钱包 API，它会同生产环境中运行的代达罗斯钱包行为一致。
 
-## Notify websockets
 
-We can test the websockets with a small utility
-application(`npm install -g wscat`):
+## WEBSOCKETS 通知
+
+我们可以用一个小工具(`npm install -g wscat`)来测试 websocks：
+
 
 ``` bash
 > wscat -c ws://127.0.0.1:8090
@@ -63,29 +57,26 @@ connected (press CTRL+C to quit)
 < {"tag":"LocalDifficultyChanged","contents":{"getChainDifficulty":4}}
 ```
 
-We should be seeing the same changes manually from here:
+从这我们可以看到相同的改变：
 
 ``` bash
 curl http://localhost:8090/api/settings/sync/progress
 ```
 
-Accound should be renamed into address. Please see an issue
-[CSM-249](https://issues.serokell.io/issue/CSM-249) for details.
+Accound 应该重命名为地址。请查看这个 issues [CSM-249](https://issues.serokell.io/issue/CSM-249) 获取更多细节。
 
-## Wallet events
+## 钱包事件
 
-Aside from these HTTP endpoints, there is one unidirectional websocket channel
-opened from server to client, the `notify` endpoint.
+除了这些 HTTP 接入点外，还有一个从服务器到客户端的单向 websocket 通道，`notify` 接入点。
 
-This channel serves as a notification system so that Daedalus UI can be informed
-about events. Currently supported events are:
+这个通道充当通知系统。以便可以告知代达罗斯 UI 相关事件。目前支持的事件有：
 
--   `LocalDifficultyChanged` - local blockchain height,
--   `NetworkDifficultyChanged` - global blockchain height,
--   `UpdateAvailable` - new system update available,
--   `ConnectedPeersChanged` - number of peers connected to the node changed,
--   `ConnectionOpened` - websocket connection opened,
--   `ConnectionClosed` - websocket connection closed.
+ - `LocalDifficultyChanged` - 当前区块链高度
+ - `NetworkDifficultyChanged` - 全球区块链高度
+ - `UpdateAvailable` - 新的系统可用更新
+ - `ConnectedPeersChanged` - 连接到对等节点数量的改变
+ - `ConnectionOpened` - 打开 websocket 连接
+ - `ConnectionClosed` - 关闭 websocket 连接
 
-As this channel is unidirectional, any message sent to the channel from the
-client will be ignored.
+由于此通道是单向的，因此从客户端发送到通道的任何消息都会被忽略。
+

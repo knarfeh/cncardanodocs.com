@@ -1,13 +1,13 @@
 ---
 layout: default
-title: Bootstrap Era
+title: 引导阶段
 permalink: /timeline/bootstrap/
 group: timeline
 ---
 
 <!-- Reviewed at c23493d7a33a82d559d5bd9d289486795cf6592f -->
 
-# Bootstrap Era
+# 引导阶段
 
 After the Cardano SL Testnet era and release of Cardano SL, the network will
 operate in “bootstrap mode” for a period of time called Bootstrap era. As people
