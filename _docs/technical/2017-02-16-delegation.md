@@ -11,7 +11,7 @@ visible: true
 
 这一章描述权益委托过程的实现细节。
 
-
+如前所述。为了产生新区块，被选举为领导者的股东必须在线。
 
 
 As described earlier, stakeholders selected as slot leaders must be online in
