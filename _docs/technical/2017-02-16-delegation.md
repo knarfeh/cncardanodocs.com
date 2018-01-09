@@ -11,82 +11,49 @@ visible: true
 
 这一章描述权益委托过程的实现细节。
 
-如前所述。为了产生新区块，被选举为领导者的股东必须在线。
+如前所述。为了产生新区块，被选举为领导者的股东必须在线。这种情况可能没有什么吸引力，因为大多数的当选股东都必须为了刷新随机数而参加投币协议（领导者选举过程的关键属性）。如果有很多当选的领导者，会让股东和网络都有很大的压力，因为需要广播和存储大量的提交和共享。
+
+委派的功能允许被称为发行人（_issuers_） `I1...In` 的股权所有人将他们的『参与义务』转移给某些代表团（_delegates_） `D1...Dm`，这些代表团会在[投币协议](https://github.com/input-output-hk/cardano-sl/blob/4bd49d6b852e778c52c60a384a47681acec02d22/src/Pos/Ssc/GodTossing.hs)中代表股权所有人 `S1...Sn`。在这种情况下，真正参与到投币协议中节点的数量就少很多，可以看看[论文](/glossary/#paper)的第38页。
+
+不仅如此，代表团不仅可以生产新区块，参与到 [MPC/SSC](/technical/leader-selection/#follow-the-satoshi) 中，还可以在[系统更新](/cardano/update-mechanism/)时进行投票。
 
 
-As described earlier, stakeholders selected as slot leaders must be online in
-order to generate new blocks. However, such a situation can be unattractive,
-because a majority of elected stakeholders must participate in the Coin Tossing
-protocol for refreshing randomness (crucial attribute of the slot leader
-election process). If there are a lot of elected stakeholders, this can put a
-strain on the stakeholders and the network, since it might require broadcasting
-and storing a large number of commitments and shares.
+## 策略
 
-Delegation feature allows stakeholders called _issuers_ `I1...In` to transfer their
-"committee participation" to some _delegates_ `D1...Dm`. These delegates will represent
-stakeholders `S1...Sn` in the [Coin Tossing protocol](https://github.com/input-output-hk/cardano-sl/blob/4bd49d6b852e778c52c60a384a47681acec02d22/src/Pos/Ssc/GodTossing.hs). In this case the actual
-number of nodes participating in the Coin Tossing protocol can be much lower,
-see [paper](/glossary/#paper), page 38.
+领导者可以将自己生产新区块的权利转移给代表团。为了转移这个权利，领导者使用一个代理委托的策略：领导者产生一个[代理签名钥匙](https://github.com/input-output-hk/cardano-sl/blob/4378a616654ff47faf828ef51ab2f455fa53d3a3/core/Pos/Crypto/SignTag.hs#L33)，或者说 PSK，然后代表团会使用它[签名](https://github.com/input-output-hk/cardano-sl/blob/ed6db6c8a44489e2919cd0e01582f638f4ad9b72/src/Pos/Delegation/Listeners.hs#L65)信息来认证一个区块。有两种类型的 PSK：重量级和轻量级（见下文）
 
-Moreover, delegates are able not only to generate new blocks or taking part in [MPC/SSC](/technical/leader-selection/#follow-the-satoshi), but also to vote in the [Update system](/cardano/update-mechanism/).
+具体来说，股权所有人通过自己的公钥构建一个特殊证书来指定代表团的身份。以便之后代表团可以在有限的信息空间内用已签名的证书在自己的公钥下为这些信息提供签名。
 
-## Schema
 
-The slot leader can transfer its right to generate a new block to the delegate. To do
-it, the slot-leader uses a *delegation-by-proxy* scheme: the slot leader generates [a proxy
-signing key](https://github.com/input-output-hk/cardano-sl/blob/4378a616654ff47faf828ef51ab2f455fa53d3a3/core/Pos/Crypto/SignTag.hs#L33), or PSK, and the delegate will use it [to
-sign](https://github.com/input-output-hk/cardano-sl/blob/ed6db6c8a44489e2919cd0e01582f638f4ad9b72/src/Pos/Delegation/Listeners.hs#L65)
-messages to authenticate a block. There are two kinds of PSKs, heavyweight and
-lightweight (see below).
+这是[代理签名](https://github.com/input-output-hk/cardano-sl/blob/d01d392d49db8a25e17749173ec9bce057911191/core/Pos/Crypto/Signing.hs#L256)的格式。它包括了：
 
-Specifically, the stakeholder forms a special certificate specifying the delegates
-identity via its public key. So later the delegate can sign messages within the
-valid message space by providing signatures for these messages under its own
-public key along with the signed certificate.
+* 代理私钥
+* 签名
 
-This is the format of a [proxy
-signature](https://github.com/input-output-hk/cardano-sl/blob/d01d392d49db8a25e17749173ec9bce057911191/core/Pos/Crypto/Signing.hs#L256).
-It includes:
+代理私钥包括：
 
-1.  proxy secret key,
-2.  signature.
+1. omega 值
+2. 发行人的公钥
+3. 代表团的公钥
+4. 代理证书
 
-The proxy secret key includes:
+Omega (or ω) 是[论文](/glossary/#paper)中一个特殊的值。在我们的实现中，它是[一对 epoch 的标识符](https://github.com/input-output-hk/cardano-sl/blob/f374a970dadef0fe62cf69e8b9a6b8cc606b5c7d/core/Pos/Core/Types.hs#L235)。这些标识符定义了委托有效期：如果 epoch 索引在这个范围内那么生产的区块就是有效的。
 
-1.  omega value,
-2.  issuer's public key,
-3.  delegate's public key,
-4.  proxy certificate.
+[代理证书](https://github.com/input-output-hk/cardano-sl/blob/d01d392d49db8a25e17749173ec9bce057911191/core/Pos/Crypto/Signing.hs#L209)就是 omega 和代表团公钥的[签名](https://github.com/input-output-hk/cardano-crypto/blob/84f8c358463bbf6bb09168aac5ad990faa9d310a/src/Cardano/Crypto/Wallet.hs#L74)
 
-Omega (or ω) is a special value from the [paper](/glossary/#paper). In our
-implementation, it is a [pair of epochs'
-identifiers](https://github.com/input-output-hk/cardano-sl/blob/f374a970dadef0fe62cf69e8b9a6b8cc606b5c7d/core/Pos/Core/Types.hs#L235). These identifiers define the delegation validity period: the produced block is
-valid if its epoch index is inside this range.
+## 重量级委派
 
-[Proxy certificate](https://github.com/input-output-hk/cardano-sl/blob/d01d392d49db8a25e17749173ec9bce057911191/core/Pos/Crypto/Signing.hs#L209)
-is a [signature](https://github.com/input-output-hk/cardano-crypto/blob/84f8c358463bbf6bb09168aac5ad990faa9d310a/src/Cardano/Crypto/Wallet.hs#L74)
-of omega and delegate's public key.
+重量级委托使用权益阈值 `T`，这意味着股权所有人拥有的权益不少于 `T` 时才能参与重量级委托。这个阈值在[配置文件](https://github.com/input-output-hk/cardano-sl/blob/42f413b65eeacb59d0b439d04073edcc5adc2656/lib/configuration.yaml#L224)中定义。就像主网的这个阈值是总权益的 0.03%，这个值可以通过系统更新来改变。
 
-## Heavyweight Delegation
+来自重量级委托的代理签名证书存储在区块链中。请注意发行者在每个 epoch 只能发布一个证书。
 
-Heavyweight delegation is using stake threshold `T`. It means that stakeholder
-has to posses not less than `T` in order to participate in heavyweight
-delegation. The value of this threshold is defined in the [configuration file](https://github.com/input-output-hk/cardano-sl/blob/42f413b65eeacb59d0b439d04073edcc5adc2656/lib/configuration.yaml#L224). Thus, the value of threshold for Mainnet is 0.03% of
-the total stake. This value can be changed by update system.
+请注意重量级委托有一个传递关系，所以，如果 `A` 委派给 B，然后 B 又委派给 `C`，那么 `C` 代表的权益等于 `A + B`，而不仅仅是 `B`。
 
-Proxy signing certificates from heavyweight delegation are stored within the blockchain.
-Please note that issuer can post only one certificate per one epoch.
 
-Please note that heavyweight delegation has transitive relation. Thus, if `A` delegates to `B`
-and after that `B` delegates to `C` then `C`'s delegated stake is equal to the sum `A + B`, not
-just `B`.
+### 到期
 
-### Expiration
+在每一个 epoch 开始时，股权所有人不再传递阈值 `T`, 那么重量级委派证书就会过期。这样做是为了预防委派池膨胀攻击：用户提交了一个证书然后将自己所有的钱（高于阈值）都转到另一个账户，并且重复此操作。
 
-Heavyweight delegation certificates expire in the beginning of every epoch if
-stakeholder does not pass threshold `T` anymore. This is made to prevent delegation
-pool bloat attacks where user commits a certificate and moves all his money (above threshold)
-to another account, and then repeats the operation.
 
 ## Lightweight Delegation
 
