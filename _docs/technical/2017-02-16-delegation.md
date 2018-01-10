@@ -17,7 +17,6 @@ visible: true
 
 不仅如此，代表团不仅可以生产新区块，参与到 [MPC/SSC](/technical/leader-selection/#follow-the-satoshi) 中，还可以在[系统更新](/cardano/update-mechanism/)时进行投票。
 
-
 ## 策略
 
 领导者可以将自己生产新区块的权利转移给代表团。为了转移这个权利，领导者使用一个代理委托的策略：领导者产生一个[代理签名钥匙](https://github.com/input-output-hk/cardano-sl/blob/4378a616654ff47faf828ef51ab2f455fa53d3a3/core/Pos/Crypto/SignTag.hs#L33)，或者说 PSK，然后代表团会使用它[签名](https://github.com/input-output-hk/cardano-sl/blob/ed6db6c8a44489e2919cd0e01582f638f4ad9b72/src/Pos/Delegation/Listeners.hs#L65)信息来认证一个区块。有两种类型的 PSK：重量级和轻量级（见下文）
@@ -55,68 +54,40 @@ Omega (or ω) 是[论文](/glossary/#paper)中一个特殊的值。在我们的�
 在每一个 epoch 开始时，股权所有人不再传递阈值 `T`, 那么重量级委派证书就会过期。这样做是为了预防委派池膨胀攻击：用户提交了一个证书然后将自己所有的钱（高于阈值）都转到另一个账户，并且重复此操作。
 
 
-## Lightweight Delegation
+## 轻量级委派
 
-**WARNING: Currently, lightweight delegation is disabled and will be reworked in [Shelley release](https://cardanoroadmap.com/),
-so information below can be outdated.**
+**注意：目前轻量级委派功能是关闭的，在 [Shelley 版本](https://cardanoroadmap.com/)中会打开这个功能，所以下面的信息可能是过期的。**
 
-In contrast to heavyweight delegation, lightweight delegation doesn't require
-that delegate posses `T`-or-more stake. So lightweight delegation is available
-for any node. But proxy signing certificates for lightweight delegation are not
-stored in the blockchain, so lightweight delegation certificate must be broadcasted
-to reach delegate.
+与重量级委托相反，轻量级委派不要求代表团拥有 `T` 或更多的股份。所以轻量级委派可以用于任何的节点。但是轻量级委派的代理签名证书不存在区块链中，所以轻量级委派证书必须要广播到代表团。
 
-Later lightweight PSK can be
-[verified](https://github.com/input-output-hk/cardano-sl/blob/42f413b65eeacb59d0b439d04073edcc5adc2656/lib/src/Pos/Delegation/Logic/Mempool.hs#L309)
-given issuer's public key, signature and message itself.
+之后轻量级 PSK 可以被指定发行者的公钥、签名和信息本身进行[验证](https://github.com/input-output-hk/cardano-sl/blob/42f413b65eeacb59d0b439d04073edcc5adc2656/lib/src/Pos/Delegation/Logic/Mempool.hs#L309)
 
-Please note that the rule "only one certificate per epoch" doesn't apply to lightweight delegation.
-Since lightweight delegation certificates are not stored in the blockchain it's possible to issue
-a lot of lightweight certificates per epoch and blockchain won't be bloated.
+请注意『每个 epoch 只能发布一个证书』的规则在轻量级委托中不适用。因为轻量级证书不存储在区块链中，所以可以在每个 epoch 签发很多轻量级证书，不会导致区块链膨胀。
 
-### Confirmation of proxy signature delivery
 
-The delegate should take the proxy signing key he has and make a signature of PSK using
-PSK and delegate's key. If the signature is correct, then it was done by the delegate
-(guaranteed by the PSK scheme).
+### 确认代理签名支付
 
-## Why Two Delegations?
+代表团应该使用他拥有的代理签名密钥，使用 PSK 和代表团的钥匙制作一个 PSK 签名。如果签名是正确地，那么就是由代表团进行签名的（由 PSK 策略确保是这种结果）。
 
-You can think of heavyweight and lightweight delegations as of strong and weak delegations correspondingly.
+## 为什么有两个委派
 
-Heavyweight certificates are stored in the blockchain, so delegated stake may participate in MPC
-by being added to the stake of delegate. So delegate by many heavyweight delegations may accumulate
-enough stake to pass eligibility threshold. Moreover, heavyweight delegates can participate in voting
-for Cardano SL updates.
+你可以将重量级委托和轻量级委托想象成强委托和弱委托。
 
-On the contrary, stake for lightweight delegation won't be counted in delegate's MPC-related stake. So
-lightweight delegation can be used for block generation only.
+重量级委派证书被存储在区块链中，所以被委派的权益可能会通过加入到委派权益中而参与 MPC。所以有很多重量级委派的代表团可能会累计足够的权益通过阈值的门槛。不仅如此，重量级委派可以参与卡尔达诺结算层更新的投票。
 
-## Revocation Certificate
+与此相反，轻量级委派的权益不会被计算到代表团的 MPC 相关权益。所以轻量级委派只能用来生产新区块。
 
-Revocation certificate is a special certificate that issuer creates to revoke delegation.
-Both heavyweight and lightweight delegation can be revoked, but not in the same way.
+## 回撤证书
 
-The revocation certificate is the same as standard PSK where issuer and delegate are the same
-(in other words, issuer delegates to himself).
+回撤证书是一种特殊的证书，发行者创建一个回撤证书来撤回委托。重量级委托和轻量级委托都可以被撤回，不过撤回的方法不同。
 
-To revoke lightweight delegation issuer sends revocation certificate to the network and
-_asks_ to revoke delegation, but it cannot _enforce_ this revocation, since lightweight PSKs
-are not the part of the blockchain. So theoretically lightweight delegate can ignore revocation
-certificate, and in this case it will remain a delegate until its delegation certificate expires.
-But such a situation won't compromise the blockchain.
+作为相同的标准PSK的发行者和委派，撤销证书也是相同的。（换句话说，发行者委派给他自己）
 
-Revocation of heavyweight delegation is handled other way. Since proxy signing certificates
-from heavyweight delegation are stored within the blockchain, revocation certificate will be
-committed in the blockchain as well. In this case the node removes heavyweight delegation
-certificate which was issued before revocation certificate. But there are three important notes
-about it:
+要撤销轻量级委派，发行者发送撤销证书给网络，要求撤销委派，但是不能强制撤销，因为轻量级的 PSK 不是区块链的一部分。所以理论上轻量级委派是可以忽略撤销证书的，这样的话，他就一直保持着委派知道它的委派过期。但这样的情况不会妨碍区块链。
 
-1.  If the committed heavyweight delegation certificate is in the node's memory pool, and revocation
-    certificate was committed as well, the delegation certificate will be removed from the memory pool.
-    Obviously, in this case delegation certificate will never be added to the blockchain.
-2.  If a user commits heavyweight delegation certificate and _after that_ he loses its money, he still
-    can revoke that delegation, even if by that time he does not have enough money (i.e. amount of money
-    he has is less than threshold `T` mentioned above).
-3.  Although an issuer can post only one certificate in the current epoch, he _can_ revoke his heavyweight
-    delegation in the same epoch.
+重量级委派撤销的处理是另一种方式。因为来自重量级委派的代理签名证书是存储在区块链中的，撤销证书也会被提交到区块链中。这种情况下，节点会删除撤销证书签发之前的重量级委派证。不过有三点很重要：
+
+* 如果提交的重量级委派证书是在节点的内存池里，而且撤销证书也被提交了，那么委派证书将会从内存池中被删除，显然，这种情况下委派证书将永远不会添加到区块链中。  
+* 如果一个用户提交委派证书后丢失了他的钱，他仍然可以撤销那个委派，即使那个时候他已经没有足够的钱了（也就是说他拥有的钱少于上面提到的阈值 `T`)  
+* 尽管发行者在当前的 epoch 只能发布一个证书，在同一个 epoch 他可以撤销他的重量级委派。
+

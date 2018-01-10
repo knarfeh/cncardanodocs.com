@@ -1,6 +1,6 @@
 ---
 layout: default
-title: 卡尔达诺结算层中的 Leader 选举
+title: 卡尔达诺结算层中的领导者选举
 permalink: /technical/leader-selection/
 group: technical
 visible: true
