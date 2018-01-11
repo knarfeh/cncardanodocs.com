@@ -9,7 +9,7 @@ visible: true
 
 # 论文与实现的区别
 
-本文档的目标是概述卡尔达诺结算层实现方式与[论文](/glossary/#论文)中提供的 乌洛波罗斯算法协议规范的不同，并阐明论文中相对晦涩的部分。
+本文档的目标是概述卡尔达诺结算层实现方式与[论文](/glossary/#论文)中提供的乌洛波罗斯算法协议规范的不同，并阐明论文中相对晦涩的部分。
 
 本文档分为四个部分：
 
@@ -21,117 +21,63 @@ visible: true
 
 # 说明
 
-## 时间, Slots, and 同步
+## 时间, Slots, 和同步
 
-In a basic model of the protocol time is divided into discrete units called
-*slots*. However, there are no details on how to obtain current time securely
-and with enough precision.
+在协议的基本模型中，时间被分成称为 slot 的离散单位。但是，没有安全获得足够精度的当前时间的详细方法。
 
-In Cardano SL, current time is obtained from user computer's system time.
+在卡尔达诺结算层中，当前时间值从用户的计算机系统时间值获取。
 
-We also have a feature to notify users if their system time is incorrect
-(we compare it with the time obtained from NTP servers). This feature is not
-released yet, but will be released soon.
+我们还有一个功能来通知用户他们的系统时间是否不正确（我们将它与 NTP 服务器的时间进行比较）。这个功能计划将来发布。
 
-## Coin Tossing and Verifiable Secret Sharing
+## 投币和可验证的密钥共享
 
-The paper suggests PVSS scheme by Schoenmakers for Cardano SL. However,
-currently Cardano SL uses ["SCRAPE: Scalable Randomness Attested by
-Public Entities"](https://eprint.iacr.org/2017/216.pdf) PVSS scheme.
+论文中由 Schoenmakers 为卡尔达诺结算层提供 PVSS(Publicly Verifiable Secret Sharing) 方案。但是，卡尔达诺结算层目前使用 ["SCRAPE: Scalable Randomness Attested by
+Public Entities"](https://eprint.iacr.org/2017/216.pdf) PVSS 方案 
 
-One of the challenges while using a VSS scheme is associating the
-public key used for signing with the public key used for VSS scheme
-(`VssPublicKey`). This is solved by introducing `VssCertificate`s. This
-certificate is a signature given by a signing key for a pair consisting of
-`VssPublicKey` and the epoch until which this certificate is valid. Initially,
-all stakeholders with stake enough for participation in randomness generation
-have certificates. When a new stakeholder with enough stake appears or when an
-existing certificate expires, a new certificate should be generated and
-submitted to the network. `VssCertificate`s are stored in blocks.
+使用 VSS（可验证的密钥分享）方案时的一个挑战是将用于签名的公钥与用于VSS方案的公钥相关联（`VssPublicKey`）。这是通过引入 `VssCertificate` 来解决的。这个证书是一个由签名密钥给出的签名，它由一个对 `VssPublicKey` 以及这个证书的有效时间组成。最初，所有参与随机生成的权益所有者都拥有证书。当出现一个拥有足够股份的新权益所有人时，或现有证书到期时，应该生成一个新的证书并提交给网络。`VssCertificate` 被存储在区块中。
 
-PVSS scheme uses share verification information which also
-includes a commitment to the secret. It is also used as a commitment in
-the protocol. The PVSS scheme has been implemented over the elliptic curve
-secp256r1. Please read about [PVSS implementation in Cardano
-SL](/technical/pvss/) for more details.
+PVSS 方案使用共享验证信息，这也包括了对密钥的提交。它也被用做协议中的提交。PVSS 提交已经在 elliptic curve
+secp256r1 实现，请阅读 [PVSS 在卡尔达诺结算层的实现](/technical/pvss/)获取更多细节。
 
-## Block Generation Time
 
-In the paper, they do not state explicitly when a slot leader should
-generate a new block and send it to the network: it can be done at the beginning
-of a slot, at the end of a slot, in the middle of a slot, etc. In Cardano SL
-there is a special constant called "network diameter" which approximates maximal time
-necessary to broadcast a block to all nodes in the network. For example, if network
-diameter is 3, then block is generated and announced 3 seconds before the end of a slot.
+## 区块生成时间
 
-## Stake Delegation
+在论文中，他们没有明确说明何时 slot 领导者应该生成一个新的区块发送给网络：它可以在 slot 的开始，slot 的结尾，slot 的中间等等。在卡尔达诺结算层中有一个特殊的常量，叫做『网络直径』（network diameter），它接近于将区块广播到网络中所有节点所需的最大时间。例如，如果网络直径值为3，则在 slot 结束前，区块会被生成，并且广播3秒。
 
-Delegation scheme, as described in the paper, does not explicitly state whether proxy
-signing certificates should be stored within the blockchain (though there is a
-suggestion to store the revocation list in the blockchain). Without storing
-proxy signing certificates in the blockchain it is barely possible to consider
-delegated stake in checking eligibility threshold. On the other hand, if all
-certificates are stored in the blockchain, it may lead to a blockchain bloat
-when a big portion of blocks will be occupied by proxy certificates. Submitting
-a certificate is free, so adversaries can generate as many certificates as they
-want.
+## 权益委派
 
-There are two types of delegation in Cardano SL: heavyweight and lightweight.
-There is a threshold on stake that one has to posses in order to participate in
-heavyweight delegation. Proxy signing certificates from heavyweight delegation
-are stored within the blockchain. On the contrary, lightweight delegation is
-available for everybody, but certificates are not stored within the blockchain
-and are not considered when checking eligibility threshold. As the paper suggests,
-*delegation-by-proxy* scheme is used.
+权益委派，如论文中描述的，不明确规定代理签名证书是否应存储在区块链中（尽管建议存储区块链中的撤销列表）。在区块链没有存储代理签名证书的情况下，几乎没有可能考虑检查委派的股份的阈值合格性。另；一方面，如果所有的证书都存储在区块链中，当大部分区块被代理证书占用时，可能会导致区块链膨胀。提交证书是免费的，所以攻击者可以根据需要生成尽可能多的证书。
 
-Please read about [Stake Delegation in Cardano SL](/technical/delegation/) for
-implementation details.
+卡尔达诺结算层有两种委派：重量级和轻量级。加入重量级委派有一个门槛。来自重量级代理的代理签名证书存储在区块链中。相反，每个人都可以使用轻量级委派，但证书不会存储在区块链中，在检查资格限制时不会考虑证书，正如论文所建议的，使用委派代理方案。
 
-# Modifications
+请阅读[卡尔达诺结算层权益委派]((/technical/delegation/)) 获取实现细节。
 
-## Leader Selection Process
 
-In the paper, Leader Selection Process is described as flipping a
-`(1 - p₁) … (1 - pⱼ₋₁) pⱼ`-biased coin to see whether the `j`-th stakeholder is
-selected as the leader of the given slot. Here `pⱼ` is probability of selecting the `j`-th
-stakeholder.
+# 修改
 
-In Cardano SL, it is implemented in a slightly different way. `R` random
-numbers in a range `[0 .. totalCoins]` are generated, where `R` is a number of
-slots in an epoch. Stakeholders occupy different subsegments on this range,
-proportional to their stakes. This way, each random number maps into stakeholder.
-Also, as the paper suggests, a short (32-bits) seed is used for initializing PRG
-instead of using `n ⌈log λ⌉` random bits.
+## 领导者选举过程
 
-Please read about [Leader Selection in Cardano SL](/technical/leader-selection/)
-for implementation details.
+在论文中，领导者选举过程被描述为翻转币的有偏估计量 `(1 - p₁) … (1 - pⱼ₋₁) pⱼ`，以判断第 j 个权益所有人是否为给定 slot 的领导者。这里 `pⱼ` 为选择第 j 个权益所有人的可能性。
 
-## Commitments, openings, shares sending
+在卡尔达诺结算层中，它以稍微不同的方式实现。生成 R 个范围为 `[0 .. totalCoins]` 的随机数，这里 `R` 为一个 epoch 里面的 slot 数量。权益所有人在这个范围内占据不同的部分，这与他们的股权成正比。这样一来，每个随机数据对应权益所有人。另外，正如论文所建议的，使用一个短的（32位）的种子来初始化 PRG，而不是使用 `n ⌈log λ⌉` 随机位数。
 
-Time of sending is randomized within a small interval. It is done to avoid network
-overload when all coin-tossing participants send their data at the same time.
-This interval is chosen to be small enough for protocol to remain secure. If
-this data is sent too late and there are many adversaries leading last few slots
-of a certain phase, it can happen that data will not be included into the block.
+请阅读[卡尔达诺结算层领导者选举](/technical/leader-selection/)获得实现细节。
 
-## Multishares
 
-In the paper, each stakeholder is presented as exactly one participant of the
-underlying VSS scheme. However, it is natural that a stakeholder with more stake
-is more important than a stakeholder with less stake with regards to secret
-sharing. For instance, if three honest stakeholders control 60% of stake in
-total (each of them controls 20%) and there are 40 adversary stakeholders each
-having 1% of stake, then the adversary has full control over secret sharing.
+## 提交，开放，股权发送
 
-To overcome this problem, a number of shares for each stakeholder proportional
-to their stake is generated in Cardano SL.
+发送时间实在一个很小的时间间隔内随机分配的。这样做是为了避免所有投币者同时发送数据时的网络过载。这个时间间隔必须足够小，以保证协议安全。如果这个数据发送得太晚，则可能会发生数据不包含在区块中的情况。
 
-## Randomness Generation Failure
+## 多个权益所有人
 
-The paper does not cover the situation when commitments cannot be recovered.
-However, a practical implementation should account for such scenarios.
-Cardano SL implementation uses a seed consisting of all zeroes if there are no
-commitments that could be recovered.
+在论文中，每个权益所有人都是基本 VSS 模型的参与者。然而，拥有更多股份的权益所有人比秘密共享股份的权益所有人更重要。例如，如果3个诚实的权益所有人控制了总共 60% 的股份（每个控制20%），并且有40个敌对权益所有人各持有1%的股份，那么对手就完全控制了秘密股份。
+
+为了解决这个问题，卡尔达诺结算层为每个利益相关者分配了一定比例的股份。
+
+## 随机生成失败
+
+论文没有涵盖提交无法恢复的情况。但是，一个现实的实现应该考虑这种情况。如果没有可以收回的提交，卡尔达诺结算层的实现使用由全零组成的种子。
+
 
 # 增加的特性
 

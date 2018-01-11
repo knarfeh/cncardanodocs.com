@@ -94,46 +94,40 @@ Slot 领导者从所有的 stakeholders 中选举。请注意并不是所有的 
 
 选举过程的根本问题是无偏性。我们需要一些随机性作为选举的基础，这样的话，选举的结果是随机的，公平的，问题是这个随机性从哪来？
 
-我们用多方计算（multiparty computation (MPC) ）方法：每个选民独立进行一次『投硬币』的行为，然后与其他选民分享结果。这个想法就是：结果由每个选民随机产生，但最终它们在相同的最终价值上达成一致。
+我们用多方计算（multiparty computation (MPC) ）方法：每个参选人独立进行一次『投硬币』的行为，然后与其他参选人分享结果。这个想法就是：结果由每个参选人随机产生，但最终它们在相同的最终价值上达成一致。
 
 #### 提交阶段
 
-首先，选民会产生一个密钥（特殊的随机值）。接着，选民会形成一个『提交』，这是一个包含加密份额（见下面的解释）以及密码的证明的消息。
+首先，参选人会产生一个密钥（特殊的随机值）。接着，参选人会形成一个『提交』，这是一个包含加密份额（见下面的解释）以及密码的证明的消息。
 
-然后选民会用密钥来签署这个提交，指定 epoch 编号，附上它的公钥。在这种情况下，每个人都可以知道谁创建了这个提交，以及这个提交属于哪个 epoch。
+然后参选人会用密钥来签署这个提交，指定 epoch 编号，附上它的公钥。在这种情况下，每个人都可以知道谁创建了这个提交，以及这个提交属于哪个 epoch。
 
-随后，选民会将其提交交给其他选民，最终每个选民都会拿到其他选民的提交。请注意，这些提交将被放入区块中，也就是说它们将成为区块链的一部分。
+随后，参选人会将其提交交给其他参选人，最终每个参选人都会拿到其他参选人的提交。
+
+注意：这些提交将被放入区块中，也就是说它们将成为区块链的一部分。
 
 
-#### Reveal Phase
+#### 开启阶段
 
-Now elector sends an “opening”, special value for opening a commitment. You can think of a
-commitment as a locked box (with a secret in it), and opening is a key we need to open this
-box and get the secret from it.
+在这个阶段参选人发送一个一个『开启』状态，这是一个打开提交的特殊值。一个提交就像一个锁着的盒子（里面有一个密钥），我们需要一个开启的钥匙来打开这个盒子，获取里面的密钥。
 
-All openings become a part of the blockchain as well as commitments.
+注意：所有的开启都将放入区块中，它们会变成区块链的一部分。
 
-#### Recovery Phase
 
-This is a final phase.
+#### 恢复阶段
 
-Eventually elector has commitments and openings. But theoretically some elector can be an
-adversary. And he could publish its commitment but **not** publish its opening.
+这是最后的阶段。
 
-In this case the honest electors can post all shares (mentioned above) to reconstruct the
-secret. The idea is simple: we have to be sure that election will finish successfully even
-if some of electors are adversaries.
+最终，参选者既有提交，也有开启。从理论上来说，一些选民可以是对手。它可以公布它的提交，但**不**公开它的开启。
 
-Then elector verifies that commitments and openings are match, and if so, he extracts the
-secrets from commitment and forms a seed from these secrets. So all electors get the same
-seed, and it will be used for Follow the Satoshi algorithm.
+在这种情况下，诚实的选民可以张贴（上面有提到）来重建密钥，这个想法很简单：即使某些选民是对手，选举也能成功结束。
+
+随后，参选者验证提交，开启匹配，如果成功，从提交中提取密钥，并从这些密钥中形成种子（随机生成的字符串）。所以所有的选民都会得到相同的种子，并且会被用于追随中本聪算法。
 
 ### 追随中本聪
 
+在参选者获取种子之后（我们需要随机性），他们必须为下一个 epoch 选择特定的 slot 领导者。这时候就引入了追随中本聪算法。它类似于这样：
 
-After electors get the seed (randomness we need), they have to select particular slot leaders for
-the next epoch. This is where Follow the Satoshi (FTS) algorithm came in. It can be shown like
-this:
 
 ```
          +-----+
@@ -141,21 +135,10 @@ SEED --->| FTS |---> ELECTED_SLOT_LEADERS
          +-----+
 ```
 
-Let's elaborate a little bit on how a slot leader gets selected. The smallest, atomic piece
-of value is a coin, we call it “[Lovelace](/glossary/#lovelace)”. Fundamentally, we can say
-that the ledger produces distribution of coins, and since slot leaders can be selected from
-stakeholders only, we are talking about distribution of stake. FTS is an algorithm that
-verifiably picks a coin, and when coin owned by stakeholder `S` gets selected, `S` become a
-slot leader. It is obviously that the more coins `S` has, the higher probability that one of
-his coins will be picked.
+我们解释一下 slot 领导者是怎么被选中的。我们将最小的，原子级的币叫做 『[Lovelace](/glossary/#lovelace)』。基本上，因为 slot 领导者只能从权益所有者中选择，账本会生成币的分发。FTS 是一个挑选币的可证算法，当权益所有人 `S` 的币被选中时，`S` 就成为一个 slot 领导者。很明显，`S` 的币越多，他的币被选中的几率也就越大。
 
-The reason why it is called “Follow the Satoshi” is that in Bitcoin, atomic piece of currency
-is called “Satoshi”, honoring Satoshi Nakamoto, the creator of Bitcoin. 
+为什么它被称为『追随中本聪算法』是因为在比特币中，货币的最小单位被称为『聪』，这是为了表彰比特币的发明人中本聪（Satoshi Nakamoto）
 
-## Honest Majority
+## 大多数都是诚实的
 
-The fundamental assumption of a protocol is a **honest majority**. It means that
-participants owning at least 50% + 1 of the total stake are honest ones. In this
-case we can **prove** that adversaries cannot break _persistence_ and _liveness_
-of the blockchain. Please read the [paper](/glossary/#paper) (pages 2 and 3) for
-more details.
+协议的基本假设前提是**大多数都是诚实的**。这意味着至少有 50%+1 的权益所有人是诚实的。在这种情况下，我们可以**证明**攻击者无法打破区块链的*持久化*和*活跃度*。欲了解更多信息，请参阅[论文](/glossary/#paper) (2到3页)。

@@ -1,39 +1,32 @@
 ---
 layout: default
-title: 余额和份额
+title: 余额和权益
 permalink: /cardano/balance-and-stake/
 group: cardano
 ---
 <!-- Reviewed at e070e675764738b5190b2f93424de403f1937216 -->
 
-# Balance and Stake in Cardano SL
+# 卡尔达诺结算层的余额和权益
 
-There are two important concepts in Cardano SL: **balance** and **stake**. This chapter
-explains the difference between these concepts.
+卡尔达诺结算层有两个重要的概念：余额和权益。这一章将解释着两个概念的差异。
 
-### Balance
 
-Balance is a real amount of coins a user has. Upon installing a Daedalus wallet on one's computer
-and performing [Ada redemption](/timeline/bootstrap/), one receives some amount of Ada. This amount of
-Ada is called one's balance. A user can send some amount of Ada (within his balance) to other users, as well as
-receive any amount of Ada from them.
+### 余额
 
-Thus, when we are talking about the balance, we are talking just about user's money.
+余额是用户真实拥有的币数。在计算机上安装代达罗斯钱包，执行 [Ada 兑换流程](/timeline/bootstrap/)时，您会收到一定数量的 Ada 币。这个 Ada 币的数量成为你的余额，您可以向其他用户发送一定数量的 Ada 币（在此余额内），也可以从其他用户接收任意数量的 Ada 币。
 
-### Stake
+因此，当我们谈到余额时，我们讨论的是用户的实际资金。
 
-Stake is a concept from the [paper](/glossary/#paper). Unlike balance (the real amount of money one has),
-you can think of "stake" as a part of the whole financial power of Cardano SL. Stake gives a user the
-power to control various Cardano SL algorithm parts, for example: being the [slot leader](/glossary/#slot-leader),
-voting in the [Update system](/cardano/update-mechanism/), taking part in [MPC/SSC](/technical/leader-selection/#follow-the-satoshi). This is why all thresholds in Cardano SL protocol are expressed in terms of stake,
-not balance.
 
-Thus, when we are talking about the stake, we are talking about a user's ability to control Cardano SL.
+### 权益
 
-### Balance and Stake Relation
+与余额（拥有的实际数额）不同，权益是卡尔达诺结算层整个金融系统的关键因素。权益让用户能够控制各种卡尔达诺结算层的算法，比如：成为 slot 领导者，在更新系统中投票，参加 MPC/ SSC，这就是为什么卡尔达诺结算层协议中的所有阈值都以权益，而不是余额来表示。
 
-Every coin in Cardano SL is associated with a balance and with a stake. We use [transaction output](/cardano/transactions/#design)
-to associate coin `C` with user's balance, and use [stake distribution](/cardano/transactions/#stake-distribution)
-to associate coin `C` with user's stake.
+因此，当我们谈到权益时，我们正在讨论用户实际控制卡尔达诺结算层的能力。有关权益的更多信息，请参阅一下的[论文](/glossary/#论文)
 
-It is possible to change association between coin and stake using [stake delegation](/technical/delegation/).
+
+### 余额和权益的关系
+
+卡尔达诺结算层的每一枚币都与余额和权益相关。我们使用[交易输出](/cardano/transactions/#design)将币 `C` 与用户余额相关联，并且我们使用股权分配将币 `C` 与用户权益相关联。
+
+注意：可以使用权益委派来更改币和股权之间的关联。
