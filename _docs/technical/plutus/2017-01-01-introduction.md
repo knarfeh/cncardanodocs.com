@@ -8,41 +8,35 @@ group: technical-plutus
 
 # Plutus 介绍
 
-Plutus is a strictly typed pure functional programming language used for
-defining smart contracts in Cardano. The syntax is fairly Haskell-like, but
-unlike Haskell, the language is eagerly evaluated.
+Plutus 是用于在 Cardano 中定义智能合约的严格类型的纯函数式编程语言。语法相当像 Haskell，但与 Haskell 不同的是， (TODO)
 
-## Declaring Data Types
 
-In Plutus, to define a data type, we give the name of the type, then any type
-parameters, together with a list of constructor alternatives — like in Haskell.
-Each constructor alternative has the types of its arguments.
+## 声明数据类型
 
-So, for instance, the type of Peano numerals would be defined as
+在 Plutus 中，为定义一个数据类型，我们给出类型的名称，然后是任何类型参数，然后是一系列的构造参数 - 就像 Haskell 中的那样，每个构造函数都有其参数的类型。
+
+所以，例如， Peano 的数字的类型被定义为
 
     data Nat = { Zero | Suc Nat }
 
-whereas binary trees would be defined as
+而二叉树被定义为
 
     data Tree a = { Leaf | Branch (Tree a) a (Tree a) }
 
-The type constructor `Tree` takes one parameter, `a`. It's inhabited by values
-constructed by two constructors, `Leaf`, which has no arguments, and `Branch`,
-which has three arguments, a left subtree of type `Tree a`, a value of type `a`,
-and a right subtree of type `Tree a`.
+`Tree` 类型的结构接受一个参数 `a`。它有两个构造函数构造的值，`Leaf` 没有参数，并且 `Branch` 有三个子树，一个左子树 `Tree a`，类型是 `a`，一个右子树，`Tree a`。
 
-We can inspect data using the `case` construct, like so:
+我们可以用 `case` 结构来查看数据，如下所示：
+
 
     case t of {
       Leaf -> ... ;
       Branch l x r -> ...
     }
 
-## Declaring Values
+## 声明值
 
-To declare a new value (whether it's a function or not), we provide its type,
-and then specify its value. For instance, to define addition for natural
-numbers, we can give a recursive definition using `case`:
+要声明一个新的值（不管它是否是函数），我们提供它的类型，然后指定它的值。例如，要定义自然数的加法，我们可以使用下面的递归定义 `case`：
+
 
     add : Nat -> Nat -> Nat {
       add = \m n ->
@@ -52,42 +46,22 @@ numbers, we can give a recursive definition using `case`:
         }
     }
 
-We can also use pattern matching equations in the same way as in Haskell, which
-makes the definition of functions like this much more elegant:
+我们也可以像 Haskell 中那样使用模式匹配，这使得这样的函数定义更加优雅：
 
     add : Nat -> Nat -> Nat {
       add Zero n = n ;
       add (Suc m) n = Suc (add m n)
     }
 
-## Smart Contract Computations
+## 智能合约计算
 
-Plutus has one important type built into the language specific for smart
-contract computations: the type constructor `Comp`, which takes one type
-parameter. The simplest way to make values is with the two computation
-constructors `success`, which takes a value `M` with type `A` (for any choice of
-`A`) and produces a computation of type `Comp A` which represents a successful
-smart contract computation that returns `M`. You can also build a value of type
-`Comp A` with just `failure`, which represents a failed computation.
+Plutus 在智能合约计算专用语言中有一个重要类型：类型构造函数 `Comp`，它带有一个类型参数。创建值最简单的方法是使用两个计算构造函数 `success`，`M` 值使用类型 `A`（任何 `A` 的选择），并生成一个 `Comp A` 代表成功的返回 `M` 的智能合约类型计算结果。你也可以构造一个返回错误的 `Comp A` 类型，表明一个失败的计算结果。
 
-It's also possible to chain smart contract computations together using `do`
-notation. Given a term `M` of the type `Comp A`, and a term `N` of type `Comp B`
-with a free variable `x` of type `A`, we can form `do { x <- M ; N }` which runs
-the computation `M`, binds its returned value to `x`, then runs the computation
-`N`. If the term `M` computes to `failure`, then the failure is propagated by
-the `do` construct and the whole thing computes to `failure`.
+同样可以使用 `do` 符号将智能合约计算连接在一起。给定一个 `Comp A` 类型的 `A`，以及有着变量 `x` 的类型 `A`，我们可以形成 `do { x <- M ; N }` 运行计算 `M`，绑定它的返回值 `X`，然后运行计算 `N`。如果这个 `M` 计算结果是 `failure`，那么这个失败就会被这个 `do` 结构传播，整个事务就被计算为 `failure`。
 
-This is most useful for building validator scripts for smart contracts. The
-standard way of doing this is by asking for a redeemer program of type `Comp A`
-and a validator program of type `A -> Comp B`, which then are composed to form
-`do { x <- redeemer ; validator x }`. The `redeemer` program is run, returning
-whatever data `validator` needs, and then that data is given to `validator` 
-which is then run.
+这对于构建只能合约的验证器脚本非常有用。这么做的标准方式是要求一个 `Comp A` 类型的赎回程序和一个 `A -> Comp B` 类型的验证程序，然后组成一个 `do { x <- redeemer ; validator x }` 类型的验证程序。该 `redeemer` 运行时的时候，不管 `validator` 需要什么数据都返回给它，`validator` 都会运行。
 
-## More Detailed Overview
+## 更详细的概述
 
-The other chapters in Plutus section provide a more detailed overview of the
-grammar, types, and programs of Plutus, including the built-in types and
-functionality, and should be read before diving into writing programs. There's
-also a demo file, showing the implementation of a number of common functions, to
-give a good sense of the use of the language.
+Plutus 部分的其他章节提供了对 Plutus 的语法，类型和程序的更详细的概述，包括内置的类型和功能，在深入编写程序前应该阅读。还有一个演示文件，展示了一些常用函数的实现，一遍可以更好地理解该语言的使用。
+
