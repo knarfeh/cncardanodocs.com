@@ -117,23 +117,17 @@ group: technical-protocols
 
 B 的传输实例在对应的接入点 IDs 上相应的 host 和 port 有监听套接字。它接受来自某个对等点的新的 TCP 连接。期望在该 TCP 连接上接收**连接请求**信息（以上述格式）。
 
+传输实例 B 必须根据以下规则以**连接请求响应**消息（采用上述格式）进行响应。
 
+如果连接请求要求本地接入点 ID 不存在（在本例中即不是0），则它必须以 `ConnectionRequestInvalid` 响应并关闭 TCP 连接。
 
-Transport instance B must now respond with a **connection request response**
-message (in the format described above), based on the following rules.
+`ConnectionRequestCrossed` 的规则将在下面更详细地描述。
 
-If the connection request asks for a local endpoint ID that does not exist (i.e.
-anything other than 0 in our example), it must respond with
-`ConnectionRequestInvalid` and close the TCP connection.
+否则，当接入点 ID 有效并且没有现有的 TCP 连接时，它应该以 `ConnectionRequestAccepted` 回复，并记录他已经与 A 建立了重量级连接的本地状态。然后它就可以继续协议的主要部分。
 
-The rules for `ConnectionRequestCrossed` are described below in more detail.
+## 交叉连接请求
 
-Otherwise, when the endpoint ID is valid and there is no existing TCP
-connection, it should reply with `ConnectionRequestAccepted` and record in its
-local state that it now has an established heavyweight with A. It may then
-proceed to the main part of the protocol.
-
-## Crossed Connection Request
+如前所述，该协议试图确保在两个接入点之间只使用一个 TCP 连接。
 
 As mentioned previously, the protocol tries to ensure that only one TCP
 connection is used between any two endpoints at once. The typical case is that
