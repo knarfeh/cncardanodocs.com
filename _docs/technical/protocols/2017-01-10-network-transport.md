@@ -6,200 +6,118 @@ group: technical-protocols
 ---
 <!-- Reviewed at ef835a2334888eda7384da707c4077a8b576b192 -->
 
-# Network Transport Layer
+# 网络传输层
 
-This guide is for developers who want to build their own client for Cardano SL.
-Please read [Cardano SL Implementation Overview](/technical/) for more info.
-This guide covers the network transport layer used in Cardano SL nodes.
+本指南适用于想为卡尔达诺结算层构建自己的客户端的开发人员。请阅读[卡尔达诺结算层实现概述](/technical/)了解更多信息。本指南涵盖了卡尔达诺结算层节点中使用的网络传输层。
 
-The transport layer is a layer that sits between TCP and the application level
-protocol. It is in principle independent of the application protocol (indeed the
-reference implementation is used in multiple different applications with
-different application level protocols).
+传输层是一个位于 TCP 和应用程序级协议的层。原则上独立于应用程序协议（事实上，参考实现被具有不同应用程序级协议的多个不同应用程序使用）。
 
-The point of the transport layer is that it provides multiple lightweight
-logical connections multiplexed on a single TCP connection. Each lightweight
-connection is unidirectional and provides reliable ordered message transport
-(i.e. it provides framing on top of TCP).
+传输层的重点在于它提供了在单个 TCP 连接上复用的多个轻量级逻辑连接。每个轻量级连接都是单向的，并提供可靠的有序消息传输（即，它在 TCP 之上提供数据帧）
 
-Properties of the transport protocol:
+传输协议的属性：
 
--   **Single TCP connection**. Only a single TCP connection at a time is used
-    between any pair of peers. These connections are potentially long-lived.
-    Once a connection with a peer is established, it is used for
-    sending/receiving messages until the TCP connection is *explicitly* closed
-    or some unrecoverable error occurs.
+- **单个 TCP 连接**。任何一对对等点之间一次只能使用一个 TCP 连接。这些连接可能是长期存在的。一旦建立了与对等节点的链接，它将用于发送/接收信息，知道 TCP连接被*明确*关闭或发生一些不可恢复的错误。
 
-Properties of the implementation:
+实现的属性：
 
--   **Reporting of network failures**. Network failures are not hidden from the
-    application layer. If a TCP connection is dropped unexpectedly, the
-    transport layer should notify the application layer. In Cardano SL, the
-    policy is to try to reconnect and only declare a peer unreachable if
-    reconnecting also fails.
+- **报告网络故障**。网络故障不会从应用程序层隐藏。如果 TCP 连接意外断开，传输层应通知应用层。在卡尔达诺结算层中，策略是尝试重新连接，如果重新连接也失败，则只声明对等方无法访问。
 
-## Overview
+## 概要
 
-Typical use of the transport involves:
+传输层的典型用途包括：
 
-1.  Listening for new TCP connections from peers.
-2.  Establishing a TCP connection to other peer(s).
-3.  Creating lightweight connections on an established TCP connection.
-4.  Sending message(s) to peer(s) (on one or more lightweight connections).
-5.  Receiving message(s) from peer(s) (on one or more lightweight connections).
-6.  Closing lightweight connections.
-7.  Closing TCP connections.
+1. 监听来自对等点的 TCP 连接。
+2. 建立到其他对等点的 TCP 连接。
+3. 在建立的 TCP 连接上创建轻型连接。
+4. 发送消息到对等节点（在一个或多个轻量级连接上）。
+5. 接收来自对等节点（在一个或多个轻量级连接上）的消息。
+6. 关闭轻量级连接
+7. 关闭 TCP 连接。
 
-In Cardano SL, multiple lightweight connections are used to support the
-application level messaging protocol. Multiple application level messages can be
-sent concurrently, and multiple conversations can be in progress at once. Most
-application messages are sent on a newly created lightweight connection, and, if
-needed, larger application level message are broken into multiple transport
-level messages for transport. Other application level messages are sent as part
-of a conversation which is put together from a pair of unidirectional
-lightweight connections.
+在卡尔达诺结算层中，使用多个轻量级连接来支持应用程序级的消息传递协议。可以同时发送多个应用程序级别的消息，多个对话可以一次进行。大多数应用程序消息是在新创建的轻量级连接上发送的，如果需要的话，较大的应用程序级别消息被分解为多个传输级别消息以便于传输，其他应用程序级别的消息是作为一对单向轻量级连接组成的对话的一部分发送的。
 
-## Terminology
 
-Basic transport concepts are:
+## 概观
 
--   Transport
--   EndPoint
--   Connection
--   Event
--   Errors
+传输层的基本概念有：
 
-**Transport** refers to the whole layer and protocol described in this document.
-An instance of the transport refers to the configuration and state of a running
-implementation of the transport, which in particular includes a TCP listening
-socket, bound to a particular port on a local network interface, for example
-`192.168.0.1:3010`.
+- 传输
+- 接入点
+- 连接
+- 事件
+- 错误
 
-**EndPoint** refers to a logical endpoint within a transport instance. This
-means it has an address and that connections are between endpoints. In practice
-it is just a thin abstraction over the TCP/IP notion of an endpoint, addressed
-via a hostname and port.
+传输指本文档描述的整个层和协议。
 
-Endpoint addresses are binary strings with the structure `HOST:PORT:LOCAL_ID`,
-for example, `192.168.0.1:3010:0`.
+**传输**是指本文档描述的整个层和协议。一个传输实例指的是传输实现的配置和状态，特别是包括绑定到本地网络特定接口的TCP监听套接字，如 `192.168.0.1:3010`。
 
-Note that while a transport instance listens on a single port, in principle
-there can be multiple addressable endpoints within a single transport instance,
-and this is what the `LOCAL_ID` refers to. Cardano SL, however, does not
-currently make use of this feature, so it always uses `LOCAL_ID` 0.
+**接入点**是传输实例的逻辑端点。这意味着它又有一个地址，连接在端点之间。在实践中，它只是一个 TCP/IP 的简单抽象，通过主机名和端口进行寻址。
 
-**Heavyweight connection** refers to a TCP connection between two endpoints. Two
-connected endpoints use one and *only one* TCP-connection at once.
+端口地址是具有结构如 `HOST:PORT:LOCAL_ID` 的二进制字符串，例如 `192.168.0.1:3010:0`。
 
-**Connection** (or more explicitly a *lightweight connection*) is a
-unidirectional connection between endpoints. All lightweight connections between
-endpoints are multiplexed on a single heavyweight connection (i.e. a single TCP
-connection).
+注意，传输实例监听单个端口时，原则上在单个传输实例中可能有多个可寻址的接入点，这就是 `LOCAL_ID` 的作用，然而，卡尔达诺结算层目前还没有这个功能，所以它总是使用 `LOCAL_ID` 0。
 
-The lightweight connections are a logical concept layered on top of TCP. Every
-connection has an integer ID. It is in principle possible to have thousands of
-lightweight connections multiplexed on a single heavyweight TCP connection.
+**重量级连接**是指两个端点之前的 TCP 连接。两个接入点只使用一次 TCP 连接。
 
-The typical style of operation is that the application layer wishes to establish
-a lightweight connection to an endpoint, and if no heavyweight connection yet
-exists, then one is created. Similarly, when the last lightweight connection is
-closed, real TCP connection is shut down cleanly.
+**连接**（或者更明确地说是*轻量级连接*）是端点之前的单向连接。端点之前的所有轻量级连接都在单个重量级连接（即单个TCP连接上）进行复用。
 
-Lightweight connections are unidirectional: messages on a lightweight connection
-flow in one direction only. However, lightweight connections can be established
-in either direction. The same heavyweight connection is used for lightweight
-connections in either direction between peers; it does not matter which peer
-first established the heavyweight connection.
+轻量级连接是在TCP之上分层的逻辑概念。每个连接都有一个整数ID。原则上可以在单个重量级TCP连接上复用数千个轻量级连接。
 
-A bidirectional conversation can be established by making use of a pair of
-unidirectional lightweight connections. Cardano SL follows this pattern. Refer
-to the `time-warp-nt` documentation for details. But note that this transport
-layer has no special concept of a bidirectional conversation, there are only
-collections of unidirectional connections.
+典型的操作方式是应用层希望建立到端点的轻量级连接，如果还没有重量级连接，则创建一个。同样，当最后一个轻量级连接关闭时，真正的 TCP 连接将被彻底关闭。
 
-## Network Byte Order
+轻量级连接时单向的：轻量级连接上的消息仅在一个方向流动。但是，轻量级连接可以在任何方向上建立。同样的重量级连接用于双向的轻量级连接；哪个端点先建立重量级连接并不重要。
 
-In the following descriptions of control messages, all integers are encoded in
-[network byte order](https://en.wikipedia.org/wiki/Endianness#Networking).
+双向会话可以通过使用一对单向轻量级连接来建立。卡尔达诺结算层遵循这种模式。请查阅 `time-warp-nt` 获取详细信息。但请注意，这个传输层没有双向对话的特殊概念，只有单向连接的集合。
 
-Thus `Int32` used below in message definitions refers to a 32-bit *signed*
-integer value in network byte order.
+## 网络字节顺序
 
-## Setting Up a Transport Instance
+在一下对控制消息的描述中，所有整数都是按[网络字节顺序](https://en.wikipedia.org/wiki/Endianness#Networking)编码的。
 
-Each transport instance must set up a TCP listening socket. The local interface
-and port number to use are determined by the application using the transport.
+下面的消息定义使用的 `Int32` 指的是32位的以网络字节顺序的整数值。
 
-The implementation should be ready to accept new TCP connections at any time
-(perhaps limited by a resource policy), and then perform the initial steps for a
-new heavyweight connection described below.
+## 设置传输实例
 
-## Establishing Heavyweight Connections (initiating)
+每个传输实例都必须建立一个 TCP 监听套接字。使用的本地端口和端口号由使用传输的应用程序确定。
 
-Assume that a heavyweight connection is to be established between endpoints
-labelled A and B, with endpoint A initiating the connection. Both endpoints have
-endpoint address, which, as previously described, are of the form
-`HOST:PORT:LOCAL_ID`.
+实现可以随时接收新的 TCP 连接（可能受限于资源策略），然后执行下面描述的新重量级连接的初始步骤。
 
-Establishing a heavyweight connection from A to B proceeds as follows. First A
-must record in its local state that it is initializing a heavyweight connection
-to B. This is needed in case of crossed connection requests (see below). A TCP
-connection is opened by endpoint A to the `HOST` and `PORT` of endpoint B.
+## 建立重量级连接（初始化）
 
-Endpoint A sends a **connection request** message with the following structure:
+假设在接入点 A，B之前建立重量级连接，端点 A 发起连接。两个端点都有端点地址，如前所述，端点地址是这种形式：`HOST:PORT:LOCAL_ID`。
+
+从 A 到 B 建立的一个重量级连接的过程如下。首先 A 必须必须在本地记录它正在初始化一个到 B 的重量级连接。在交叉连接请求的情况下（见下文）这是必须的，由端点 A 向端点 B 打开 `HOST` 和 `PORT` 连接。
+
+端点 A 发送具有如下结构的**连接请求**消息：
+
 
     +-----------+-------------+--------------------+
     |   B-LID   |   A-EIDlen  |       A-EID        |
     +-----------+-------------+--------------------+
     |   Int32   |   Int32     |       bytes        |
 
-Where
+其中：
 
--   `B-LID` - `B`'s endpoint local ID;
--   `A-EIDlen` - length of `A`'s endpoint address;
--   `A-EID` - `A`'s endpoint address.
+-   `B-LID` - `B` 端点的本地 ID;
+-   `A-EIDlen` - `A` 端点的地址;
+-   `A-EID` - `A` 端口的地址。
 
-Thus A sends the local endpoint ID that it wishes to connect to, and its own
-address to identify the initiating node. The address that A sends should be its
-canonical public address. The host part may be an IP address or DNS name. It is
-used to avoid establishing multiple TCP connections between endpoints. Within
-the Cardano SL protocol, the local endpoint ID is always 0.
+因此 A 发送它希望连接的本地接入点 ID，它自身的地址来初始化节点。A 发送的地址应该是规范化的公共地址。主机部分可以是 IP 地址或 DNS 名称。它用于避免在端点之间建立多个 TCP 连接。在卡尔达诺结算层协议中，本地端点 ID 始终为0。
 
-Endpoint A then expects a **connection request response** message which is a
-single `Int32` encoding one of the following responses:
+然后接入点 A 期望一个**连接请求响应**信息，它是下面的响应之一，一个简单的 `Int32` 编码。
 
--   `ConnectionRequestAccepted` (0)
--   `ConnectionRequestInvalid` (1)
--   `ConnectionRequestCrossed` (2)
+当本地接入点 ID 所标识的端点不存在时，会返回 `ConnectionRequestInvalid` 响应。例如，如果 A 发送给 B，它希望连接到本地接入点 ID 1，那么只有 ID 0 存在时才会发生。在这种情况下，两个端点必须关闭 TCP 连接。
 
-In the typical `ConnectionRequestAccepted` case, endpoint A must record in its
-local state that it now has an established (i.e. no longer initializing)
-heavyweight to B. It may then proceed to the main part of the protocol described
-below.
+当端点 B 确定 A 与 B 之间或 B 与 A 之间，或两者同时有了一个 TCP 连接，会返回 `ConnectionRequestCrossed` 响应。在这种情况下，两个端点都必须关闭 TCP 连接。
 
-A `ConnectionRequestInvalid` response occurs when the endpoint identified by the
-local endpoint ID does not exist. For example, it happens if A sends to B that
-it wishes to connect to local endpoint ID 1, when only ID 0 exists. In this case
-both endpoints must close the TCP connection.
+## 建立重量级连接 (接收)
 
-A `ConnectionRequestCrossed` response occurs when endpoint B determined that a
-TCP connection already exists between A and B, or connections between A and B,
-and B and A were being established concurrently. In this case both endpoints
-must close the TCP connection.
+假设如前所述，在标记为 A 和 B 的端点之前建立重量级连接，并且端点 A 发起连接。我们现在从端点B的角度来考虑这个问题。
 
-## Establishing Heavyweight Connections (Receiving)
+两个端点都有 `HOST:PORT:LOCAL_ID` 形式的接入点地址。具体来说，假设 B 只有一个接入点，其中 `LOCAL_ID` 为 0。
 
-Assume, as before, that a heavyweight connection is to be established between
-endpoints labelled A and B, with endpoint A initiating the connection. We now
-consider this from the point of view of endpoint B.
+B 的传输实例在对应的接入点 IDs 上相应的 host 和 port 有监听套接字。它接受来自某个对等点的新的 TCP 连接。期望在该 TCP 连接上接收**连接请求**信息（以上述格式）。
 
-Both endpoints have endpoint address of the form `HOST:PORT:LOCAL_ID`. To be
-concrete, assume that B has only one endpoint, with `LOCAL_ID` of 0.
 
-The transport instance for B has a listening socket open on the host and port
-corresponding to the endpoint IDs. It accepts a new TCP connection from some
-peer. It now expects to receive on that TCP connection a **connection request**
-message (in the format described above).
 
 Transport instance B must now respond with a **connection request response**
 message (in the format described above), based on the following rules.
