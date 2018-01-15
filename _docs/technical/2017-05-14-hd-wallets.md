@@ -7,103 +7,72 @@ visible: true
 ---
 <!-- Reviewed at 866fd6a29a15c503e54426f17b91bd8b0903c5dc -->
 
-# HD wallets
+# HD 钱包
 
-HD wallets is a feature which allows users to derive keys in deterministic way
-from a common seed. Basically, you generate an initial secret key `SK₀` out of a
-random seed. Then you can derive children `SK₀-₀`, `SK₀-₁` out of `SK₀`. From
-these children, you can derive `SK₀-₀-₀`, `SK₀-₀-₁`, `SK₀-₁-₀` and so on
-(derivations for a tree of arbitrary depth).
+HD 钱包是一个允许用户已一种确定性方式从普通种子中获取密钥的功能。基本上，你可以从一个随机种子中产生一个初始密钥。然后你就可以从 `SK₀` 得到孩子 `SK₀-₀`, `SK₀-₁`。从这些孩子中，你可以得到 `SK₀-₀-₀`, `SK₀-₀-₁`, `SK₀-₁-₀` 等（推导任意深度的树）。
 
 <!-- For subscripts and other symbols: https://help.ubuntu.com/community/ComposeKey -->
 
-We distinguish two types of keys:
+我们会区分两种类型的键（TODO）：
 
 -   **Hardened**
 -   **Non-hardened**
 
-The only distinction here is that **hardened** keys allow only generation of
-child secret keys out of parent secret keys. Thus, to derive a child key for
-a hardened key, you have to own the private key. **Non-hardened** keys allow one to
-derive a child public key out of a parent public key (not having the secret key
-available).
+这里唯一的区别是 **hardened** 密钥允许从父密钥派生出子密钥。因此，为了派生一个 **hardened** 键，你必须拥有私钥。**Non-hardened**密钥允许从父公钥派生子公钥（不具有可用密钥）。
 
-Each child is assigned a 4-byte index `i`:
+每个孩子被分配一个4字节的索引 `i`:
 
--   `i ≤ 2³¹ - 1` for **non-hardened** keys,
--   `i > 2³¹ - 1` for **hardened** keys.
+-   `i ≤ 2³¹ - 1` **non-hardened** 键。
+-   `i > 2³¹ - 1` **hardened** 键.
 
-## Properties:
+## 属性:
 
-1.  The tree structure is kept in root address. Users need to copy their public
-    key and pass it to anyone they want to be able to restore tree.
+1. 树结构保存在根地址中。用户需要复制公钥将其传递给任何想要恢复树的人。
 
-## Address format
 
-We use `PublicKey` address (already present in the system) and add the attributes
-field. In the attribute indexed by `0` (**HD wallets attribute**) we store tree
-data.
+## 地址格式
 
-Tree is stored as a list of **derivation paths**. Each **derivaion path** is
-specified as a list of **derivation indices**. Each **derivation index** is 4-byte
-unsigned int.
+我们使用 `PublicKey` 地址（已经存在于系统中），并添加属性字段。在由 `0` (**HD 钱包属性**) ，我们存储树数据。
 
-The resulting object is serialized and encrypted with symmetric scheme
-(*ChaChaPoly1305* algorithm) with the passphrase computed as SHA-512 hash of the
-root public key. This will not allow an adversary to map all addresses on the chain to
-their root as long as we do not actually store any funds on the root key (which
-is not forced by consensus rules, rather by UI).
+树存储为**派生路径**的列表。每个**派生路径**被指定为**派生索引**的列表。每个**派生索引**都是4字节的无符号整数。
 
-**Crucial point in design:** root public keys are not used to actually store
-money.
+所得到的对象被序列化并使用对称方案（*ChaChaPoly1305*算法进行加密），密码被计算为根公钥的SHA-512散列。只要我们实际上没有再根密钥上存储任何资金（不通过共识规则，而是通过用户界面），那么将不允许攻击者将链上的所有地址隐射到根。
 
-## Use cases
+**设计的关键点：**根密钥不用于实际存储金钱。
 
-### Financial audit
+## 用例
 
-One should provide the auditor hash of a root public key to let auditor find all
-keys in hierarchy.
+### 财务审计
 
-### Payment server
+应该提供一个根公钥的审计散列，让审计人员找到层次结构中的所有密钥。
 
-_It is applicable for **non-hardened** keys only._
+### 付款服务器
 
-For server to be able to derive subsequent addresses to receive payments to
-them, one needs to upload there either:
+它只适用于 **non-hardened** 键。
 
--   Root public key
+为了使服务器能够获得后续地址来收取付款，需要上传：
 
--   Payload of:
+- 根公钥
+- 有效载荷：
+    - `i` 级别的 `PK`
+    - 跟公钥的哈希
+    - `PK` 的树路径
 
-    -   Public key `PK` of level `i`
+### 钱包
 
-    -   Hash of root public key
+要使钱包在某个子树上运行，需要提供：
 
-    -   Tree path for `PK`
+- 根密钥
+- 有效载荷：
+    - `SK` 级别的密钥 `i`
+    - 根公钥的哈希
+    - `SK` 的树路径
 
-### Wallet
+## 要求
 
-For wallet to operate over some subtree, one needs to provide either:
+`A(K)` 表示保存密钥对信息的地址 `K`。`child(K, i)` 表示第 `i`个子密钥对 `K`。`tree(K)` 表示从 `K`（有证书余额）派生，以 **utxo** 保存的密钥对地址树。
 
--   Root secret key
-
--   Payload of:
-
-    -   Secret key `SK` of level `i`
-
-    -   Hash of root public key
-
-    -   Tree path for `SK`
-
-## Requirements
-
-Let `A(K)` denote the address that holds information about keypair `K`. Let
-`child(K, i)` denote the `i`-th child keypair of `K`. Let `tree(K)` denote the
-tree of addresses for keypairs, derived from `K` (and having positive balance)
-and held in **utxo**.
-
-`a -> b` denotes `b` is derivable form `a`. `a -x b` denotes `b` is not
-derivable from `a` (under no circumstances):
+`a -> b` 表示 `b` 从 `a` 派生。`a -x b` 表示 `b` 不是从 `a` 派生的（在任何情况下）：
 
     priv(K) -> pub(K)
     pub(K) -> A(K)
@@ -111,136 +80,105 @@ derivable from `a` (under no circumstances):
     A(K) -x pub(K)
     A(K) -x A(child(K, i))
 
-For **hardened** keys:
+对于 **hardened** 键：
 
     (priv(K), utxo) -> tree(K)
     pub(K) -x pub(child(K, i))
     priv(K) -> priv(child(K, i))
 
-For **non-hardened** keys
+对于 **non-hardened** 键：
 
     (pub(K), utxo) -> tree(K)
     pub(K) -> pub(child(K, i))
     priv(K) -> priv(child(K, i))
 
-## Derivation Crypto Interface
+## 派生加密接口
 
-### Notation:
+### 符号:
 
--   `kp` denotes a private key with index `p`. Just an **Ed25519** private key.
+- `kp` 表示具有索引 `p` 的私钥。只是一个 **Ed25519** 私钥
+- `kp` 表示带有索引 `p` 的公钥。只是一个 **Ed25519** 公钥
+- `cp` 表示带有索引的链
 
--   `Kp` denotes public key with index `p`. Just an **Ed25519** public key.
+### 熵
 
--   `cp` denotes chain code with index `p`.
+在比特币中，它们使用512位的散列，但 `kp` 只有 256 位，因为这个原因，我们需要遵循512位的密钥，所以我们不减少哈希空间。
 
-### Entropy
+- 扩展的私钥是表示为 `(ki, ci)` 的一对。
+- 扩展的私钥是表示为 `(Ki, ci)` 的一对。
 
-In BTC, they use 512-bit hash, but `kp` is only 256 bit. For this reason we need
-to comply key to 512 bit, so we do not reduce hashing space.
+从应用角度来看，HD 钱包（BIP-32）引入了以下密码原语：
 
--   Extended private key is a pair denoted as `(ki, ci)`.
+- `CKDpriv :: ((kpar, cpar), i) → (ki, ci)`  
+从父扩展私钥计算自扩展私钥
 
--   Extended public key is a pair denoted as `(Ki, ci)`.
+- `CKDpub :: ((Kpar, cpar), i) → (Ki, ci)`  
+从父扩展私钥中调用一个子扩展私钥
 
 From application perspective, HD wallets (as for BIP-32) introduce following
 crypto primitives:
 
--   `CKDpriv :: ((kpar, cpar), i) → (ki, ci)`
+# 代达罗斯 HD 钱包
 
-    Computes a child extended private key from the parent extended private key.
+本节介绍 HD 钱包功能的使用方式。它分为两部分：
 
--   `CKDpub :: ((Kpar, cpar), i) → (Ki, ci)`
+1. 扩展钱包后端 API 以在本地支持 HD 钱包结构（就像在比特币中完成的那样）
+2. 利用新的地指数型来扩展区块链处理以保持多个客户端实例的 HD 结构同步。
 
-    Сomputes a child extended public key from the parent extended public key.
+## 本地存储
 
-# Daedalus HD wallets
+### 旧的存储
 
-This section describes the way the HD wallets feature is used. It is
-split into two parts:
+旧的钱包存储存的是地址列表。每个地址都与一个名称相关联，并且是从单独的密钥（由助记符备份并用消费密码加密）派生而来。
 
-1.  Extension of wallet backend API to support HD wallet structure locally (as
-    it is done in Bitcoin).
+### 新的存储
 
-2.  Extension to blockchain handling to utilize new address attribute to keep HD
-    structure on several client instances in sync.
+钱包的存储扩展到存储**钱包**列表。每个钱包对应一个根密钥（由助记符备份并用消费密码加密）
 
-## Local storage
+每个钱包都包含一个**账户**。
 
-### Old storage
+每个账户都包含多个**地址**（即地址是 HD 树中第二层的关键字）。
 
-The old wallet storage stored a list of addresses. Each address was associated with a name
-and was derived from separate secret key (backed up by mnemonics and encrypted
-with the spending password).
+这映射到一个 HD 树：
 
-### New storage
+- 钱包组对应第 0 级（*根*）密钥。
+- 钱包对应1级密钥（根的孩子）。
+- 地址对应于第2级（根的孙子）的密钥。
 
-Wallet storage is extended to store a list of **wallets**. Each wallet corresponds
-to a single root secret key (backed up by mnemonics and encrypted with spending
-password).
+钱只保存在地址上。
 
-Each wallet contains a number of **accounts**.
+当从一个或多个地址花费金钱时，如果有的话，将产生新的余额？（TODO）
 
-Each account contains a number of **addresses** (i.e. an address is a key of the
-2nd level in a HD tree).
+### 可用性
 
-This maps to a HD tree:
+用户能够：
 
--   wallet set corresponds to key of 0-th level (*root*),
+- 导入/导出任意数量的**钱包**，
+- 生成任意数量的**账户**，
+- 分配**钱包**和**账户**名称，
+- 生成任意数量的地址，
+- 改变钱包消费密码
 
--   wallet corresponds to key of 1-th level (children of root),
 
--   address corresponds to key of 2-th level (grandchildren of root).
+## 从区块链中读取 HD 钱包数据
 
-Money are kept only on addresses.
+有两种导入/导出钱包的方法：
 
-When money are spent from one or several addresses, a new one is to be generated
-for money remainder, if any.
+- 通过**助记符**，
+- 通过导出文件。
 
-### Usability
+助记符在前端生成，并允许确定性地生成密钥。名称不会被恢复。
 
-A user is able to:
+导出文件能够恢复整个钱包结构。
 
--   import/export an arbitrary number of **wallets**,
+### 导入
 
--   generate an arbitrary number of **accounts**,
+在两种情况下我们都有一个根密钥。在导入的时候会执行下面的步骤：
 
--   assign name to **wallets** and **accounts**,
+- 根密钥在本地存储中被检查为不存在。
+- 遍历 **utxo** 查找与此根密钥对应的所有有余额的地址，并将它们与服务（钱包）一起添加到存储中。
+- 在文件导入的情况下，从步骤2得到的结构标有名称。此外，导入的文件中列出的钱包/地址，目前没有被使用。
 
--   generate an arbitrary number of **addresses**,
+### 新的事务处理
 
--   change **wallet** spending password.
-
-## Read HD Wallet Data from Blockchain
-
-There are two ways of importing/exporting wallet:
-
--   via **mnemonics**,
--   via export file.
-
-**Mnemonics** is generated on front end side and allows to deterministically
-generate secret key. Names will not be restored.
-
-Export file allows to restore the whole wallet structure.
-
-### Import
-
-In both cases we have a secret root key. The following procedure should be
-applied for import:
-
--   Root key is checked to be absent in local storage.
-
--   **utxo** is traversed to find all addresses with positive balance
-    corresponding to this root key and add them to storage along with their
-    parents (wallets).
-
--   In case of file import, the structure that resulted from step 2 is labeled with
-    names. Also, the wallets/addresses listed in the imported file and not spent at the moment are
-    created.
-
-### New transaction handling
-
-When a new transaction gets available (appears either in block or in mempool),
-inputs are analyzed. If the input corresponds to public key address with **HD
-wallet attribute**, it is checked if this address corresponds to one of our
-*wallet*s. If it does, the address is imported to structure (to show balance in
-user interface).
+当有新的交易可用时（出现在区块或内存池中），输入会被分析。如果输入对应于具有 **HD 钱包属性**的公共密钥地址，则检查该地址是否对应于我们的**钱包**之一。如果是这样，地址将被导入到结构中（为了在用于界面显示余额）。
