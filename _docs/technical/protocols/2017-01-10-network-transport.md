@@ -127,63 +127,25 @@ B 的传输实例在对应的接入点 IDs 上相应的 host 和 port 有监听�
 
 ## 交叉连接请求
 
-如前所述，该协议试图确保在两个接入点之间只使用一个 TCP 连接。
+如前所述，该协议试图确保在两个接入点之间只使用一个 TCP 连接。典型的情况是，端点可以简单地确定它是否具有与对等体的重量级连接。因为它启动它或接收它，并且知道现有的 TCP 连接是否仍然打开。难处理的情况是两个端点*同时*建立重量级连接（分布式系统意义上的『同一时间』）。
 
-As mentioned previously, the protocol tries to ensure that only one TCP
-connection is used between any two endpoints at once. The typical case is that
-an endpoint can simply determine if it has an existing heavyweight connection to
-a peer because it either initiated it or received it and it knows if any
-existing TCP connection is still open. The hard case arises when two endpoints
-initiate establishing heavyweight connections to each other *at the same time*
-(in the usual distributed systems sense of "same time").
+每个端点初始化重量级连接的过程都记录在本地状态中。每个端点都将照常发送连接请求消息。当每个端点接受传入的 TCP 连接时，它会从连接请求消息获取端点 ID。
 
-Each endpoint will have recorded in its local state that it is in the process of
-initiating a heavyweight connection to the other endpoint. Each endpoint will
-send the connection request message as usual. When each endpoint accepts an
-incoming TCP connection, it checks the peer endpoint ID from the connection
-request message.
+额外的规则是，它必须在其本地状态查到，对等点的连接1. 已经建立（TODO）2. 已经完全确立。在第一种情况下，我们处于交叉连接的情况。第二种情况是当一个对等房发现现有的 TCP 连接失败（即它的端点被关闭），并且正尝试建立一个新的 TCP 连接，而其他的对等点没有发现已有的 TCP 连接已经失效了。
 
-The additional rule is that it must lookup in its local state to see if a
-connection to the peer endpoint was either 1. already *being* established
-outbound or 2. already fully established. In the first case then we are in the
-crossed connection situation. The second case can also occur legitimately (i.e.
-not a protocol violation) when one peer has discovered that the existing TCP
-connection has failed (i.e. its end is closed) and is trying to establish a new
-TCP connection, while the other peer has not yet discovered that the existing
-TCP connection is dead.
+### 交叉连接情况
 
-### Crossed Connection Situation
+在交叉连接的情况下，到目前为止，这在端点之间是完全对称的，但我们必须打破对称来解决使用哪个 TCP 连接以及需要关闭哪个。协议用来打破对称性的解决方案的对端点地址进行排序（以二进制字符串形式按字典顺序排序）。因此，每个节点必须采用的用来决定是否接受传入连接请求的规则是：`ConnectionRequestAccepted`，如果对等点的 ID 小于本地端点 ID，则应答，否则 回复 `ConnectionRequestCrossed`，关闭 TCP 连接。
 
-In the crossed connection situation, thus far this is completely symmetric
-between endpoints, but we must break the symmetry to resolve which of the two
-TCP connections to use, and which to close. The solution the protocol uses to
-break the symmetry is that the endpoint addresses can be ordered
-(lexicographically in their binary string form). Thus the rule each node must
-use to decide whether to accept or reject the incoming connection request is:
-reply with `ConnectionRequestAccepted` if the peer's endpoint ID is less than
-the local endpoint id, and otherwise reply with `ConnectionRequestCrossed` and
-close the TCP connection.
+### 连接断开/重建请求
 
-### Connection Dead / Re-establish Situation
+在第二种情况下，处理传入 TCP 连接的端点已经确定在两个端点之前已经存在已建立的连接，该协议如下。发送一个 `ConnectionRequestCrossed` 回复，关闭 TCP 连接。此外，端点尝试验证现有连接的活跃性，目的是验证它是否处于活动状态，或确定它不是为了关闭断开的链接（这将允许打开新连接）。
 
-In the second case, where the endpoint handling the incoming TCP connection has
-determined that an established connection already exists between the two
-endpoints, the protocol is as follows. A `ConnectionRequestCrossed` reply is
-sent and the TCP connection is closed. Additionally, the endpoint tries to
-validate the liveness of the existing connection, with the purpose of either
-validating that it is live or determining that it is not in order to close the
-dead connection (which will then allow opening a new one).
+为了验证活跃性，接入点发送一个 **ProbeSocket** 信息。如果在实现定义的时间段内未收到 **ProbeSocket** 消息，则接入点应关闭 TCP 连接并相应地更新其本地状态，以使端点能够建立新的连接。
 
-To validate the liveness, the endpoint sends a **ProbeSocket** message. If a
-**ProbeSocketAck** message is not received within an implementation-defined time
-period then the endpoint should close the TCP connection and update its local
-state accordingly to enable a new connection to be established by either
-endpoint.
+接收 ProbeSocket 消息的接入点应该使用 ProbeSocketAck 回复。
 
-An endpoint that receives a ProbeSocket message should reply with a
-ProbeSocketAck.
-
-The encoding for these messages is simple:
+这些消息的编码很简单：
 
     +-------------+
     | ProbeSocket |
@@ -195,39 +157,23 @@ The encoding for these messages is simple:
     +----------------+
     |     Int32      |
 
-where the value for the control message headers are 4 and 5 respectively.
+其中控制头消息的值分别是 4 和 5。
 
-## Main Protocol
+## 主要协议
 
-Once a heavyweight connection has been established between two endpoints then
-the main part of the protocol begins.
+一旦在两个端点之间建立了一个重量级连接，协议的主要部分就开始了。
 
-The main protocol between two endpoints consists of sending/receiving a series
-of messages: control messages and data messages. Each has a header to identify
-the message and a body appropriate to the message type. The messages for the
-main protocol are control messages to create and close lightweight connections,
-and data messages for sending data on a lightweight connection.
+两个端点之间的主要协议包括发送/接收一系列消息：控制消息和数据消息。每个都有一个标识消息的头部和适合消息类的主体部分。主协议的消息是用于创建和关闭轻量级连接的控制消息，以及用于在轻量级连接上发送数据的数据消息。
 
-Lightweight connections are unidirectional. There are independent sets of
-lightweight connections in each direction of the TCP connection. The lightweight
-connections in each direction are managed by the *sending* side. The receiving
-side has no direct control over the allocation of lightweight connections.
+轻量级连接时单向的。在 TCP 连接的每个方向都有独立的轻量级连接集合。*发送方*管理每个方向的轻量级连接。接收方不能直接控制轻量级连接的分配。
 
-Lightweight connections are identified by a Lightweight connection ID, which is
-a 32-bit signed integer. Lightweight connection IDs must be greater than 1024.
-Lightweight connection ID numbers should be used sequentially.
+轻量级连接由轻量级连接 ID 区分，这是一个 32 位的有符号整数。轻量级连接 ID 必须大于 1024.轻量级连接 ID 号应该按顺序使用。
 
-The control messages to create or close a lightweight connection simply identify
-the lightweight connection ID that they act on. Similarly, data messages
-identify the ID of the lightweight connection that the data is being sent on.
+用于创建或关闭轻量级连接的控制消息只是简单的区分它们所处的轻量级连接 ID。同样，数据消息根据正在发送轻量级连接的 ID 标识。
 
-Messages for different connection ID can be interleaved arbitrarily (enabling
-the multiplexing of the different lightweight connections). The only constraints
-are the obvious ones: for any connection ID the sequence of messages must be a
-create connection message, any number of data messages and finally a close
-connection message.
+用于不同连接 ID 的消息可以任意交织（实现不同轻量级连接的复用）。唯一的约束是很显然的：对于任意连接 ID，消息序列必须是创建的连接消息，任意数量的数据消息以及关闭连接消息。
 
-The format of these messages is as follows:
+这些消息的格式如下：
 
     +-----------+-----------+
     | CreateCon |   LWCId   |
@@ -244,92 +190,42 @@ The format of these messages is as follows:
     +-----------+-----------+-------------------+
     |   Int32   |   Int32   |     Len-bytes     |
 
-where:
+其中：
 
--   CreateCon control header is 0;
--   CloseCon control header is 1;
--   LWCId is the lightweight connection id, which is &gt;= 1024.
+- CreateCon 控制头是 0；
+- CloseCon 控制头是 1;
+- LWCId 是轻量级的连接ID, 它 &gt;= 1024。
 
-The header Int32 is aliased between the control message headers and the
-lightweight connection IDs of the data messages, which is why connection ids
-must be 1024 or greater.
+头部 Int32 是控制消息头部和数据消息的轻量级连接 ID 的别名，这就是为什么连接 ID 必须是 1024或更大的原因。
 
-The data messages consist of the lightweight connection ID and a length-prefixed
-frame of data. Implementations of this protocol may wish to impose a maximum
-size on these data frames, e.g. to ensure reasonable multiplexing between
-connections or for resource considerations.
+数据消息由轻量级连接 ID 和以长度为前缀的数据帧组成。这个协议的实现可能希望最大化这些数据帧，例如为了因资源考虑而确保连接之前合理的复用。
 
-Note that there need be no direct correspondence between these message
-boundaries and reads/writes on the TCP socket or packets. It may make sense for
-performance or network efficiency to arrange for a connection open, small data
-message and connection close to be sent in a single write.
+请注意，这些数据边界和 TCP 套接字或数据包上的读取/写入之间不需要直接对应。为性能和网络效率考虑，在单一的写中管理连接开启，小数据消息和连接关闭是合理的。
 
-## Closing Heavyweight Connections
+## 关闭重量级连接
 
-Cleanly closing the heavyweight connection is not trivial. This is because the
-heavyweight connection should only be closed once lightweight connections in
-both directions are closed. Given that the allocation of lightweight connections
-is controlled independently by each endpoint then some synchronization is
-required for both endpoints to agree that there are no more lightweight
-connections in either direction.
+关机的关闭重量级连接并不是很简单。这是因为只有在两个方向上的轻量级连接都关闭时，才能关闭重量级连接。鉴于轻量级连接的分配由每个端点独立控制，因此两个端点之间需要进行一些同步，以便两个端点在任意方向上不再有轻量级连接达到一致。
 
-When one endpoint determines that it has no more outgoing lightweight
-connections, and the set of incoming connections it knows of is empty, then it
-may initiate the protocol to close the heavyweight connection. It does so by
-sending a **CloseSocket** message. The message carries the maximum incoming
-lightweight connection ID seen by the endpoint: i.e. the highest connection ID
-that has been allocated by the remote endpoint that has so far been seen by the
-local endpoint. The local endpoint now updates the state it uses to track the
-remote endpoint to note that it is now in the process of closing. If the local
-endpoint now receives a create connection message from the remote endpoint,
-while it has the remote endpoint marked as being in the process of closing then
-it resets the state back to the normal connection established state. This
-happens if the remote endpoint opened a new lightweight connection before it
-received the close socket message, and so the attempt to close the socket should
-be abandoned.
+当一个端点确定它没有更多的输出的轻量级连接，并且它知道传入的连接集市空的，那么它可以启动协议来关闭重量级连接。它通过发送一个 **CloseSocket** 来实现。该信息携带了该端点能看到的最大传入轻量级连接 ID：即由本地端点迄今为止已看到的远程端点分配的最高连接 ID。本地端点更新它用于跟踪远程端点的状态，以表明它现在正在关闭。如果本地端点现在收到来自远程端点的创建连接消息，而远程端点被标记为处于关闭过程中，则它将状态重置为正常连接建立状态。如果远程端点在收到关闭套接字消息之前打开一个新的轻量级连接，则会发生这种情况，因此应该尝试关闭应被禁止的套接字。
 
-When an endpoint receives a **CloseSocket** message it checks its local state to
-check the number of outbound lightweight connections and the maximum lightweight
-connection ID it has used for outgoing connections. If there are still outbound
-connections then the close socket message is ignored. Additionally, if the
-maximum outbound lightweight connection ID used thus far by the local node is
-higher than the one received in the close socket message then the close socket
-message is ignored. This case can happen even if the number of outbound
-connections is currently zero, if an outbound connection was created and then
-closed prior to the close socket message arriving. In both cases what has
-happened is that the heavyweight connection has become active again while one
-side was trying to close it due to inactivity, and so it is appropriate to
-abandon the attempt to close it.
+当一个端点收到 **CloseSocket** 消息，检查其本地状态，已检查出站轻量级连接的数量以及它用于传出连接的最大轻量级连接 ID。如果仍然有出站连接，则关闭套接字消息将被忽略。此外，如果本地节点到目前为止使用的最大出站轻量级连接 ID 高于关闭套接字消息中收到的最大出站轻量级连接 ID，则关闭套接字消息将被忽略。即使出站连接数目前为零，如果出站连接被创建并在关闭套接字消息到达之前被关闭，也会发生这种情况。在这两种情况下发生的事情是，重量级连接再次变得活跃，而一方则由于不活跃而试图关闭它，因此放弃尝试关闭它是合适的。
 
-If on the other hand there are no outbound connections and the last new
-connection ID seen by the remote endpoint is the same as that locally, then both
-sides agree and the TCP connection should be closed.
+另一方面，如果没有出站连接，并且远程端点看到的最后一个新的连接 ID 与本地相同，则双方都同意，并且应该关闭 TCP 连接。
 
-The message structure is:
+消息结构是：
 
     +-------------+-----------+
     | CloseSocket |   LWCId   |
     +-------------+-----------|
     |    Int32    |   Int32   |
 
-where:
+其中：
 
--   `CloseSocket` - close connection control message, value `2`;
--   `LWCId` - maximum lightweight connection ID used thus far.
+-   `CloseSocket` - 关闭连接控制消息，值为 `2`;
+-   `LWCId` - 迄今使用的最大轻量级连接 ID。
 
-## Flow Control and Back-pressure
+## 流量控制和背压（TODO）
 
-Lightweight connections do not provide any flow control over and above what is
-provided by TCP. The protocol does not provide any facility to reject incoming
-lightweight connections. Any such facility must be layered on top, in the
-application layer or another intermediate layer.
+轻量级连接不提供任何超出 TCP 提供的流量控制。该协议不提供任何设施来拒绝传入的轻量级连接。任何这样的设施都必须在顶层，在应用层或另一个中间层。
 
-Implementations should consider the problem of back-pressure and head of line
-blocking. Head of line blocking is a problem common to many protocols layered on
-top of TCP, such as HTTP 1.x where one large response can "block" other smaller
-responses for other URLs because the responses are sent in order. This problem
-is less severe in this transport protocol because connection are multiplexed, so
-small messages need not be blocked by large messages. Nevertheless, it is still
-the case that the multiplexed stream of data for all connections must be
-received in order: it is not possible to push back on one lightweight connection
-vs another, only on the whole heavyweight connection.
+实现应该考虑背压和头部堵塞问题。Head of line？是许多 TCP 协议层面的共同问题，例如 HTTP 1.x，其中一个较大的响应可以『阻塞』其他 URL 的较小的响应，因为这些响应式按顺序发送的。这个问题在这个传输协议中不同严重，因为连接是复用的，所以小消息不需要被大消息阻塞。尽管如此，还是必须按顺序接收所有连接的多路复用数据流：不可能在整个重量级连接上返回一个轻量级连接。
