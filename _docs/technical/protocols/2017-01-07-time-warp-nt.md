@@ -6,58 +6,41 @@ group: technical-protocols
 ---
 <!-- Reviewed at dcf5509d8fc93ac4c221726d076dafe632d32b70 -->
 
-# Time-Warp-NT Layer
+# Time-Warp-NT 层
 
-[`time-warp`](https://github.com/serokell/time-warp-nt/) is developed to provide
-a reliable networking layer with different levels of abstractions. Another
-important objective of `time-warp` is to provide an easy way to write and run
-tests for distributed systems using emulation mode, which should be flexible
-enough to support various scenarios (tunable network delays, disconnects,
-other real-time conditions).
+[`time-warp`](https://github.com/serokell/time-warp-nt/) 是为提供不同抽象层次方法的可靠网络层而开发的。`time-warp` 另一个重要的目标是提供一种使用仿真模式编写和运行分布式系统测试的简单方法，该模式可以足够灵活地支持各种情况（可调节网络延迟，断开连接和其他实时情况）。
 
-`time-warp` is split up into two main parts:
-
-1.  `Mockable` interfaces.
-2.  Network functionality.
+`time-warp` 主要分为两个部分：
+1. `Mockable` 接口。
+2. 网络功能。
 
 ## Mockable
 
-[`Mockable`](https://github.com/serokell/time-warp-nt/blob/dfefb3ccbcd746909b10048e9f49641e1885a4ec/src/Mockable/Class.hs#L30)
-interfaces allow to abstract from language-specific details of implementation
-of the basic functions.
+[`Mockable`](https://github.com/serokell/time-warp-nt/blob/dfefb3ccbcd746909b10048e9f49641e1885a4ec/src/Mockable/Class.hs#L30) 接口允许从基本功能实现的语言特定细节中抽象出来。
 
-They are split into several categories. For instance, [`Mockable Delay`](https://github.com/serokell/time-warp-nt/blob/dfefb3ccbcd746909b10048e9f49641e1885a4ec/src/Mockable/Monad.hs#L21) contains
-`delay` operation, while [`Mockable Fork`](https://github.com/serokell/time-warp-nt/blob/dfefb3ccbcd746909b10048e9f49641e1885a4ec/src/Mockable/Monad.hs#L23) keeps elementary functions to manipulate threads.
+他们分成几个类别。例如，[`Mockable Delay`](https://github.com/serokell/time-warp-nt/blob/dfefb3ccbcd746909b10048e9f49641e1885a4ec/src/Mockable/Monad.hs#L21) 包含 `delay` 操作，而 [`Mockable Fork`](https://github.com/serokell/time-warp-nt/blob/dfefb3ccbcd746909b10048e9f49641e1885a4ec/src/Mockable/Monad.hs#L23)  保留基本功能来操作线程。
 
-This innovation allows to launch the same code both in production and testing
-environment, where the latter allows to emulate time, threads, networking, etc.
+这个创新允许在生产和测试环境中启动相同的代码，后者允许模拟时间，线程，网络等。
 
-[`Production`](https://github.com/serokell/time-warp-nt/blob/dfefb3ccbcd746909b10048e9f49641e1885a4ec/src/Mockable/Production.hs#L42) implements [all those interfaces](https://github.com/serokell/time-warp-nt/blob/dfefb3ccbcd746909b10048e9f49641e1885a4ec/src/Mockable/Production.hs#L54-L219) with references to respective prototypes of the functions.
+[`Production`](https://github.com/serokell/time-warp-nt/blob/dfefb3ccbcd746909b10048e9f49641e1885a4ec/src/Mockable/Production.hs#L42) [实现了这些接口](https://github.com/serokell/time-warp-nt/blob/dfefb3ccbcd746909b10048e9f49641e1885a4ec/src/Mockable/Production.hs#L54-L219) ，并引用了各自功能的原型。
 
-## Networking
+## 网络
 
-This layer is written on top of [network-transport](https://github.com/serokell/network-transport/)
-and provides network capabilities for the application layer. It is split up into two sub-layers:
-**lower** and **upper**.
+该层写在[网络传输](https://github.com/serokell/network-transport/)之上，为应用层提供网络功能。它被分成两个子层：**低层**和**高层**。
 
-### Lower Layer
+### 低层
 
-This sub-layer is a direct wrapper over [`network-transport`](https://github.com/serokell/network-transport/)
-package, and it provides a convenient interface which allows to initiate lightweight
-connection and send/receive data on it. Please read [Network Transport Layer
-guide](/technical/protocols/network-transport) for more info.
+这个子层是 [`network-transport`](https://github.com/serokell/network-transport/) 包的直接封装，它提供了一个方便的接口，允许发起轻量级的链接和发送/接收数据。请阅读[网络层传输指南](/technical/protocols/network-transport)了解更多信息。
 
-It supports two types of connections, **unidirectional** and **bidirectional**.
+它支持两种类型的连接，**单向**和**双向**。
 
-#### Unidirectional Connections
+#### 单向连接
 
-Unidirectional connections allow to send a stream of bytes without waiting for
-peer's response.
+单向连接允许发送一个字节流而不用等待对方的响应。
 
-The function [`withOutChannel`](https://github.com/serokell/time-warp-nt/blob/dfefb3ccbcd746909b10048e9f49641e1885a4ec/src/Node/Internal.hs#L1465) executes given action, providing it with [one-shot
-lightweight connection](https://github.com/serokell/time-warp-nt/blob/dfefb3ccbcd746909b10048e9f49641e1885a4ec/src/Node/Internal.hs#L1828).
+[`withOutChannel`](https://github.com/serokell/time-warp-nt/blob/dfefb3ccbcd746909b10048e9f49641e1885a4ec/src/Node/Internal.hs#L1465) 功能执行给定的操作，为其提供[一次性的轻量级连接](https://github.com/serokell/time-warp-nt/blob/dfefb3ccbcd746909b10048e9f49641e1885a4ec/src/Node/Internal.hs#L1828)。
 
-Upon unidirectional connection initialization, node [sends `U`](https://github.com/serokell/time-warp-nt/blob/dfefb3ccbcd746909b10048e9f49641e1885a4ec/src/Node/Internal.hs#L1376):
+单向连接初始化时，节点[发送 `U`](https://github.com/serokell/time-warp-nt/blob/dfefb3ccbcd746909b10048e9f49641e1885a4ec/src/Node/Internal.hs#L1376)。
 
     +------------------+
     |       UNI        |
@@ -65,20 +48,15 @@ Upon unidirectional connection initialization, node [sends `U`](https://github.c
 
     |   'U' :: Word8   |
 
-`Word8` represents 8-bit unsigned integer value.
+`Word8` 表示8位无符号整数值。
 
-#### Bidirectional Сonnections
+#### 双向连接
 
-Bidirectional connections allow both nodes to send and receive bytes to each
-other.
+双向连接允许两个节点相互发送和接收字节。
 
-The function [`withInOutChannel`](https://github.com/serokell/time-warp-nt/blob/dfefb3ccbcd746909b10048e9f49641e1885a4ec/src/Node/Internal.hs#L1405) establishes connection, executes given action
-with given handle to send and receive bytes on connection, and automatically
-closes connection on action's end. Its usage requires a handshake, which
-contains the following steps.
+[`withInOutChannel`](https://github.com/serokell/time-warp-nt/blob/dfefb3ccbcd746909b10048e9f49641e1885a4ec/src/Node/Internal.hs#L1405)  函数建立连接，用给定的句柄执行给定的动作，以在连接上发送和接收字节，并在动作结束时自动关闭连接。它的使用需要握手，其中包含以下步骤。
 
-First, the initiator [sends](https://github.com/serokell/time-warp-nt/blob/dfefb3ccbcd746909b10048e9f49641e1885a4ec/src/Node/Internal.hs#L1443) a **connection request**, which has the following
-structure:
+首先，发起者[发送](https://github.com/serokell/time-warp-nt/blob/dfefb3ccbcd746909b10048e9f49641e1885a4ec/src/Node/Internal.hs#L1443)一个**连接请求**，其具有以下结构：
 
     +------------------+-----------------+
     |     `BI_SYN`     |      Nonce      |
@@ -86,9 +64,11 @@ structure:
 
     |   'S' :: Word8   |   Word64 (BE)   |
 
-where `Nonce` is [randomly generated](https://github.com/serokell/time-warp-nt/blob/dfefb3ccbcd746909b10048e9f49641e1885a4ec/src/Node/Internal.hs#L1421).
+其中 `Nonce` 是[随机生成的](https://github.com/serokell/time-warp-nt/blob/dfefb3ccbcd746909b10048e9f49641e1885a4ec/src/Node/Internal.hs#L1421)。
 
-Then the peer [sends](https://github.com/serokell/time-warp-nt/blob/dfefb3ccbcd746909b10048e9f49641e1885a4ec/src/Node/Internal.hs#L1072) **acknowledgement**, with the following structure:
+
+然后对方[发送](https://github.com/serokell/time-warp-nt/blob/dfefb3ccbcd746909b10048e9f49641e1885a4ec/src/Node/Internal.hs#L1072) 以如下结构发送**确认**：
+
 
     +------------------+-----------------+--------------+
     |     `BI_ACK`     |      Nonce      |   PeerData   |
@@ -96,72 +76,49 @@ Then the peer [sends](https://github.com/serokell/time-warp-nt/blob/dfefb3ccbcd7
 
     |   'A' :: Word8   |   Word64 (BE)   |   Generic    |
 
-where `Nonce` is the [same nonce which came from request](https://github.com/serokell/time-warp-nt/blob/dfefb3ccbcd746909b10048e9f49641e1885a4ec/src/Node/Internal.hs#L1067).
+其中 `Nonce` 是[来自请求的相同随机数](https://github.com/serokell/time-warp-nt/blob/dfefb3ccbcd746909b10048e9f49641e1885a4ec/src/Node/Internal.hs#L1067)
 
-If the initiator receives the acknowledgement with correct nonce, a conversation
-is started.
+如果发起者以正确地随机数接收到确认，则开始对话。
 
-The opposite case could take place if the node have never sent any request on
-that nonce (peer made a protocol error). It could also be that the node did send
-the `BI_SYN`, but its handler for that conversation had already finished. That's
-normal, and the node should ignore this acknowledgement.
+如果节点从未发送过任何请求（对等点发生协议错误），则会发生相反的情况。也有可能是节点确实发送了 `BI_SYN`，但对话的处理程序已经完成了。这是正常的，节点应该忽略这个确认。
 
-[`PeerData`](https://github.com/input-output-hk/cardano-sl/blob/4378a616654ff47faf828ef51ab2f455fa53d3a3/infra/Pos/Communication/Types/Protocol.hs#L58) is some additional information that is sent from the peer and parsed
-by the initiator. `time-warp` gives you an ability to provide some binary data
-during handshake which then can be used by your application in different ways.
-The structure of this data is generic. [*Application Level*
-section](/technical/protocols/csl-application-level/#message-names) describes
-how Cardano SL uses `PeerData`.
 
-### Messaging
+[`PeerData`](https://github.com/input-output-hk/cardano-sl/blob/4378a616654ff47faf828ef51ab2f455fa53d3a3/infra/Pos/Communication/Types/Protocol.hs#L58)  是由对等体发送并由发起者解析的一些附加信息。`time-warp` 使您能够在握手过程中提供一些二进制数据，然后以不同的方式使用您的应用程序。这个数据的结构是互通的，[*应用程序级别*
+章节](/technical/protocols/csl-application-level/#message-names) 描述了卡尔达诺结算层如何使用 `PeerData`。
 
-Before talking about upper layer, let's describe messaging.
+### 消息
 
-In order to specify different handlers for various message types, sent messages
-should implement [`Message`](https://github.com/serokell/time-warp-nt/blob/724769fe102752050e31ed8f609316a8a3e59589/src/Node/Message/Class.hs#L54) interface, defining two methods:
+在讨论上层之前，我们来描述消息。
 
-1.  `messageName`, it returns unique message identifier, which is sent along
-    with the message itself and allows receiver to select correct handler to
-    process this message.
-2.  `formatMessage`, it provides description of message, for debug purposes.
+为了让不同的消息类型指定不同的处理程序，发送的消息硬功实现 [`Message`](https://github.com/serokell/time-warp-nt/blob/724769fe102752050e31ed8f609316a8a3e59589/src/Node/Message/Class.hs#L54)  接口，定义两种方法：
+1. `messageName`，它将返回唯一的消息标识符，该标识符与消息本身一起发送，并允许接收者选择正确地处理程序来处理此消息。
+2. `formatMessage`， 它提供消息的描述，用于调试目的。
 
-Please see `Message` [instance](https://github.com/serokell/time-warp-nt/blob/8a4c8792049a589cdc3e87f6a863b026430b266e/test/Test/Util.hs#L133) for the [`Parcel` data type](https://github.com/serokell/time-warp-nt/blob/8a4c8792049a589cdc3e87f6a863b026430b266e/test/Test/Util.hs#L127) as an example.
+请查看 `Message` [实例](https://github.com/serokell/time-warp-nt/blob/8a4c8792049a589cdc3e87f6a863b026430b266e/test/Test/Util.hs#L133) 的 [`Parcel` 数据类型](https://github.com/serokell/time-warp-nt/blob/8a4c8792049a589cdc3e87f6a863b026430b266e/test/Test/Util.hs#L127)作为例子。
 
-### Upper Layer
 
-This sub-layer enables message exchange. It provides *conversation style* of
-communication. This style uses capabilities of bidirectional connection and allows
-to send/receive messages (one or more). For a single conversation, types of incoming
-and outgoing messages are fixed. In this case, the initiator node sends the message
-name once, and then both the initiator and the peer send required messages.
+### 上层
 
-Network events processing is initiated by [`node`](https://github.com/serokell/time-warp-nt/blob/e39f6b2c4a2aaaab308eddb9efee0503af73d927/src/Node.hs#L366) function. This function uses two important concepts: worker
-and listener.
+这个子层实现了数据交换。它提供了交流的*沟通方式*。该类型使用双向连接的功能，并允许发送/接收信息（一个或多个）。对于单个对话，输入和输出消息的类型是固定的。在这种情况下，发起方节点只发送一次消息名称，然后发起方和对方发送所需的消息。
 
-***Worker*** is some action which performs as the initiator of all
-communication, being supplied with [`SendActions` type](https://github.com/serokell/time-warp-nt/blob/e39f6b2c4a2aaaab308eddb9efee0503af73d927/src/Node.hs#L160) which provides
-function [`withConnectionTo`](https://github.com/serokell/time-warp-nt/blob/8a4c8792049a589cdc3e87f6a863b026430b266e/src/Node.hs#L163).
-This function initiates *conversation*, executing given action with
-[`ConversationActions`](https://github.com/serokell/time-warp-nt/blob/8a4c8792049a589cdc3e87f6a863b026430b266e/src/Node/Conversation.hs#L26)
-provided and closing conversation once action completes. In turn,
-`ConversationActions` provides [`send`](https://github.com/serokell/time-warp-nt/blob/8a4c8792049a589cdc3e87f6a863b026430b266e/src/Node/Conversation.hs#L28) and [`recv`](https://github.com/serokell/time-warp-nt/blob/8a4c8792049a589cdc3e87f6a863b026430b266e/src/Node/Conversation.hs#L35) functions to communicate with peer.
+网络事件处理由 [`node`](https://github.com/serokell/time-warp-nt/blob/e39f6b2c4a2aaaab308eddb9efee0503af73d927/src/Node.hs#L366) 功能启动。这个函数使用了两个重要的概念：worker
+和 listener。
 
-***Listener*** is a [handler](https://github.com/serokell/time-warp-nt/blob/8a4c8792049a589cdc3e87f6a863b026430b266e/src/Node.hs#L117)
-for a message. Each listener remembers type of related message, and
-several listeners with non-overlapping message types could be defined.
+**Worker** 是作为所有通信发起者执行的一些动作，被用于提供提供 [`withConnectionTo`](https://github.com/serokell/time-warp-nt/blob/8a4c8792049a589cdc3e87f6a863b026430b266e/src/Node.hs#L163) 功能的 [`SendActions` 类型](https://github.com/serokell/time-warp-nt/blob/e39f6b2c4a2aaaab308eddb9efee0503af73d927/src/Node.hs#L160)。这个函数启动*对话*，执行 [`ConversationActions`](https://github.com/serokell/time-warp-nt/blob/8a4c8792049a589cdc3e87f6a863b026430b266e/src/Node/Conversation.hs#L26) 给定的动作，一旦动作完成关闭会话。反过来，`ConversationActions` 提供 [`send`](https://github.com/serokell/time-warp-nt/blob/8a4c8792049a589cdc3e87f6a863b026430b266e/src/Node/Conversation.hs#L28) 和 [`recv`](https://github.com/serokell/time-warp-nt/blob/8a4c8792049a589cdc3e87f6a863b026430b266e/src/Node/Conversation.hs#L35) 功能来与对等点对话。
 
-Please see [complete example](https://github.com/serokell/time-warp-nt/blob/e39f6b2c4a2aaaab308eddb9efee0503af73d927/examples/PingPong.hs) for technical details.
+***Listener*** 是一个消息的 [handler](https://github.com/serokell/time-warp-nt/blob/8a4c8792049a589cdc3e87f6a863b026430b266e/src/Node.hs#L117)。每个相关消息的 listener 成员类型，以及几个不重复消息类型的 listeners 可以被定义。
 
-### Serialization
+请查看[完整例子](https://github.com/serokell/time-warp-nt/blob/e39f6b2c4a2aaaab308eddb9efee0503af73d927/examples/PingPong.hs) 获取技术细节。
 
-`time-warp` doesn't rely on any predefined serialization strategy, but rather
-allows users to use their own.
+### 序列化
 
-To define custom serialization, a user should create special data type, the
-so-called *packing type*, and implement [`Serializable`](https://github.com/serokell/time-warp-nt/blob/724769fe102752050e31ed8f609316a8a3e59589/src/Node/Message/Class.hs#L77) interface for it. This interface defines
-two methods:
+`time-warp` 不依赖任何预定义的序列化策略，而是允许用户使用自己的。
 
-1.  `packMsg`, represents the way how to pack the data to raw bytestring.
-2.  `unpackMsg`, represents the way how to unpack the data.
+要定义自定义序列化，用户应该可以创建特殊的数据类型，即所谓的*打包类型*，并为其实现 [`Serializable`](https://github.com/serokell/time-warp-nt/blob/724769fe102752050e31ed8f609316a8a3e59589/src/Node/Message/Class.hs#L77)  接口。这个接口定义了两个方法：
 
-Please see `Serializable` [instance](https://github.com/serokell/time-warp-nt/blob/fef2c9943d279403386d204554b1c08fc357f196/src/Node/Message/Binary.hs#L43) for the [`BinaryP` data type](https://github.com/serokell/time-warp-nt/blob/fef2c9943d279403386d204554b1c08fc357f196/src/Node/Message/Binary.hs#L20) as an example.
+1.  `packMsg`，展示将数据压缩到原始字符串。
+2.  `unpackMsg`， 展示将数据解压缩。
+
+
+请查阅 `Serializable` [实例](https://github.com/serokell/time-warp-nt/blob/fef2c9943d279403386d204554b1c08fc357f196/src/Node/Message/Binary.hs#L43)作为 [`BinaryP` 数据类型](https://github.com/serokell/time-warp-nt/blob/fef2c9943d279403386d204554b1c08fc357f196/src/Node/Message/Binary.hs#L20) 的例子。
+
