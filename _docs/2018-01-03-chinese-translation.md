@@ -8,7 +8,7 @@ group: base
 
 # 中文翻译说明
 
-域名 [cncardanodocs.com](https://cncardanodocs.com/) 购买于 2018.01.03，有效期是 2 年，就目前的情况来说，不能保证两年后一定会为这个网站续费，未来可能会将翻译文档 merge 到源仓库，视情况而定。这些文档的翻译属于个人行为，不以盈利为目的，会尽可能保证原文档的风格，不做艺术加工，原版权属于 Cardano。  
+域名 [cncardanodocs.com](http://cncardanodocs.com/) 购买于 2018.01.03，有效期是 2 年，就目前的情况来说，不能保证两年后一定会为这个网站续费，未来可能会将翻译文档 merge 到源仓库，视情况而定。这些文档的翻译属于个人行为，不以盈利为目的，会尽可能保证原文档的风格，不做艺术加工，原版权属于 Cardano。  
 
 如果发现关于翻译上的任何问题，你可以提一个 Issues 或 PR，代码仓库在：[knarfeh/cncardanodocs.com](https://github.com/knarfeh/cncardanodocs.com)
 
