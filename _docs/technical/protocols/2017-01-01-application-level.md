@@ -35,9 +35,9 @@ instance Message MsgGetHeaders where
 
 在这个特定的案例中，数据结构有两个字段：`mghFrom` 和 `mghTo`。使用 `mgh` 这样的前缀，是因为 Haskell 把记录字段的符号放在全局名字空间中，所有程序员有责任避免冲突。
 
-应该指出的是，有时你会看到使用类型变量 `ssc` 进行参数化的消息。这是为了使代码与我们进行共享种子计算的方式是多态的。[Here](https://github.com/input-output-hk/cardano-sl/blob/04dc8e4a640a62f0d82633f3a78ab3d8540fd5e6/src/Pos/Block/Network/Types.hs#L65-L67) 是一个消息的例子，首先发送最新的头部，minding `ssc`。（TODO）
+应该指出的是，有时你会看到使用类型变量 `ssc` 进行参数化的消息。这是为了使代码与我们进行共享种子计算的方式是多态的。[这里](https://github.com/input-output-hk/cardano-sl/blob/04dc8e4a640a62f0d82633f3a78ab3d8540fd5e6/src/Pos/Block/Network/Types.hs#L65-L67) 是一个消息的例子，首先发送最新的头部，minding `ssc`。（TODO）
 
-消息序列化的方式可以在 [`Pos.Binary.Communication`](https://github.com/input-output-hk/cardano-sl/blob/04dc8e4a640a62f0d82633f3a78ab3d8540fd5e6/src/Pos/Binary/Communication.hs)  模块看到。
+消息序列化的方式可以在 [`Pos.Binary.Communication`](https://github.com/input-output-hk/cardano-sl/blob/04dc8e4a640a62f0d82633f3a78ab3d8540fd5e6/src/Pos/Binary/Communication.hs) 模块看到。
 
 每个消息类型都应该有一个 `Message` 类型类的实例。请参阅 [Time-Warp-NT 指南](/technical/protocols/time-warp-nt/#messaging)了解更多信息。
 
@@ -108,12 +108,6 @@ class MessagePart a where
 
 该表包含所有使用的消息部分的名称。这些名字也可以在 [`Pos.Communication.Message`](https://github.com/input-output-hk/cardano-sl/blob/0906d8abc8e4ba8e1366defc3af0f5363e530146/src/Pos/Communication/Message.hs) 模块中找到。为了区分整数加法，连接在这里表示为 `(++)`
 
-This table contains names for all used messages/message parts. These names could also
-be found in
-[`Pos.Communication.Message`](https://github.com/input-output-hk/cardano-sl/blob/0906d8abc8e4ba8e1366defc3af0f5363e530146/src/Pos/Communication/Message.hs)
-module. To distinguish from integers addition, concatenation is denoted here as
-`(++)`.
-
 | Message type     | Message name                    |
 |------------------|---------------------------------|
 | MsgGetHeaders    | `4`                             |
@@ -139,9 +133,9 @@ module. To distinguish from integers addition, concatenation is denoted here as
 
 ## 委派消息
 
-委派是一个功能，它允许一个叫做 *issuer* 的权益所有人让另一个权益所有人（称为委托人）来代表她来生成块。
+委派是一个功能，它允许一个叫做 *issuer* 的权益所有人让另一个权益所有人（称为委托人）来代表它来生成块。
 
-为此，issuer 应该创建代理签名密钥，允许委托人签署代替 issuer 的区块。任何权益所有人都可以验证代理签名密钥实际上是由特定权益所有人想特定代理发布的，并且该密钥在某个时间段是有效的。
+为此，issuer 应该创建代理签名密钥，允许委托人签署代替 issuer 的区块。任何权益所有人都可以验证代理签名密钥实际上是由特定权益所有人通过特定代理发布的，并且该密钥在某个时间段是有效的。
 
 委派可以有两种类型：per-epoch 委派和可撤销的长期证书的授权。每个 Per-epoch 委派称为『轻量级』，而长期的委派称为『重量级』。
 
@@ -154,7 +148,7 @@ module. To distinguish from integers addition, concatenation is denoted here as
 
 轻量级委派允许委派人替代 issuer 在一定范围内的 epochs 生成区块（这个范围是签名密钥指定的）
 
-为此，issuer 应该通过网络发送包含时间范围的消息，issuer 密钥，委派公钥和证书。来自网络的每个节点都会收到这条消息，并可以稍后检查生成该块的人是否适合。轻量级委派数据存储在内存中，在一段时间后会被删除（[在配置文件中定义](https://github.com/input-output-hk/cardano-sl/blob/acc53f53a20c7985d6550b4812117e44db08a70b/core/constants.yaml#L55))。
+为此，issuer 应该通过网络发送包含时间范围的消息，issuer 密钥，委派公钥和证书。来自网络的每个节点都会收到这条消息，并可以稍后检查生成该块的人是否合适。轻量级委派数据存储在内存中，在一段时间后会被删除（[在配置文件中定义](https://github.com/input-output-hk/cardano-sl/blob/acc53f53a20c7985d6550b4812117e44db08a70b/core/constants.yaml#L55))。
 
 这种授权类型可以用于在发行人知道某个时间范围内不存在的情况下将生成区块的权利委托给某个可信任的节点。
 
@@ -185,8 +179,6 @@ module. To distinguish from integers addition, concatenation is denoted here as
 
 # Workers, Listeners 和 Handlers
 
-You can think about them as «operating personnel» for messages.
-
 你可以把它们视为消息的『操作人员』
 
 **Workers** 发起消息交换，因此 worker 是卡尔达诺结算层的积极沟通部分。**Listeners**可以从 workers 接收信息，且可能会发送一些消息作为回复。因此 listener 是卡尔达诺结算层的被动通信部分，收到信息后，listener 使用一种叫做 **handler** 的函数来实际执行相应的作业。根据收到的信息的类型使用特定的处理程序（如上所述，消息具有不同的类型）。
@@ -202,14 +194,14 @@ You can think about them as «operating personnel» for messages.
 
 获取块在 [`Pos.Block.Network.Retrieval`](https://github.com/input-output-hk/cardano-sl/blob/83fbebb3eec16c30a96c499301250c5a3756c0c1/src/Pos/Block/Network/Retrieval.hs) 模块中进行处理。
 
-这个 [`retrievalWorker`](https://github.com/input-output-hk/cardano-sl/blob/83fbebb3eec16c30a96c499301250c5a3756c0c1/src/Pos/Block/Network/Retrieval.hs#L50) 非常重要：它是一个在[区块检索队列](https://github.com/input-output-hk/cardano-sl/blob/83fbebb3eec16c30a96c499301250c5a3756c0c1/src/Pos/Block/Network/Retrieval.hs#L84)上验证头文件的服务器，这些区块形成一个合适的链。它发送一个 `MsgGetBlocks` 类型的信息给 listener，[此时](https://github.com/input-output-hk/cardano-sl/blob/83fbebb3eec16c30a96c499301250c5a3756c0c1/src/Pos/Block/Network/Retrieval.hs#L284)它从这个 listener 接收一个类型为 `MsgBlock` 信息的回答，
+这个 [`retrievalWorker`](https://github.com/input-output-hk/cardano-sl/blob/83fbebb3eec16c30a96c499301250c5a3756c0c1/src/Pos/Block/Network/Retrieval.hs#L50) 非常重要：它是一个在[区块检索队列](https://github.com/input-output-hk/cardano-sl/blob/83fbebb3eec16c30a96c499301250c5a3756c0c1/src/Pos/Block/Network/Retrieval.hs#L84)上验证头文件的服务器，这些区块形成一个合适的链。它发送一个 `MsgGetBlocks` 类型的信息给 listener，[此时](https://github.com/input-output-hk/cardano-sl/blob/83fbebb3eec16c30a96c499301250c5a3756c0c1/src/Pos/Block/Network/Retrieval.hs#L284)它从这个 listener 接收一个类型为 `MsgBlock` 信息的回答。
 
 这是另一个例子 - [`requestHeaders`](https://github.com/input-output-hk/cardano-sl/blob/83fbebb3eec16c30a96c499301250c5a3756c0c1/src/Pos/Block/Network/Logic.hs#L261) 功能。这个函数处理预期的区块头，并在本地跟踪它们。在[这个地方](https://github.com/input-output-hk/cardano-sl/blob/83fbebb3eec16c30a96c499301250c5a3756c0c1/src/Pos/Block/Network/Logic.hs#L271)，它向 listener 发送一种类型为 `MsgGetHeaders` 的信息，而[在这](https://github.com/input-output-hk/cardano-sl/blob/83fbebb3eec16c30a96c499301250c5a3756c0c1/src/Pos/Block/Network/Logic.hs#L275)，它从这个 listener 接收一个类型为 `MsgHeaders` 的回答。
 
 [`Pos.Block.Worker`](https://github.com/input-output-hk/cardano-sl/blob/d564b3f5a7e03e086b62c88212870b5ea89f5e8b/src/Pos/Block/Worker.hs) 模块中定义了用于区块处理的其他 worker。我们重用了上述的 `retrievalWorker`（TODO），并记载了一个记录良好的 `blkOnNewSlot` worker。它代表了一个新 slot 开始时应该完成的操作，这个操作包括以下步骤：
 
 1. 如有必要，生成一个[创始区块](https://github.com/input-output-hk/cardano-sl/blob/a5f7991ff03a1e45114b901bfbbbb1ee3cd4d194/src/Pos/Block/Worker.hs#L100)。
-2. 获取当前 epoch 的 leader
+2. 获取当前 epoch 的 leader。
 3. 如果我们是 slot 领导者，或者我们委派这么做，[生成起始区块](https://github.com/input-output-hk/cardano-sl/blob/a5f7991ff03a1e45114b901bfbbbb1ee3cd4d194/src/Pos/Block/Worker.hs#L114)（可选）。
 
 ### 逻辑
@@ -274,7 +266,7 @@ You can think about them as «operating personnel» for messages.
 
 ## WorkMode 和 MinWorkMode
 
-有一个特殊的类型称为 [`WorkMode`](https://github.com/input-output-hk/cardano-sl/blob/73cf4fc35d3cfb068458f2b6982990d08a99906e/src/Pos/WorkMode/Class.hs#L65)，[`MinWorkMode`](https://github.com/input-output-hk/cardano-sl/blob/73cf4fc35d3cfb068458f2b6982990d08a99906e/src/Pos/WorkMode/Class.hs#L107)  表示一系列执行真实世界的分布式系统的工作的约束条件。你可以把约束看做*运行时保证*，它可以在特定的上下文执行特定的操作。例如，如果我们根据 **logging**  约束定义一些函数 `f` 的类型，我们肯定知道我们在这个函数 `f` 里面记录不同的信息。
+有一个特殊的类型称为 [`WorkMode`](https://github.com/input-output-hk/cardano-sl/blob/73cf4fc35d3cfb068458f2b6982990d08a99906e/src/Pos/WorkMode/Class.hs#L65)，[`MinWorkMode`](https://github.com/input-output-hk/cardano-sl/blob/73cf4fc35d3cfb068458f2b6982990d08a99906e/src/Pos/WorkMode/Class.hs#L107)  表示一系列执行真实世界的分布式系统的工作的约束条件。你可以把约束看做*运行时保证*，它可以在特定的上下文执行特定的操作。例如，如果我们根据 **logging** 约束定义一些函数 `f` 的类型，我们肯定知道我们在这个函数 `f` 里面记录不同的信息。
 
 上面描述的所有 workers 和 handlers 都受 `WorkMode` 的限制。
 
