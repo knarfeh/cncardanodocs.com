@@ -67,7 +67,7 @@ group: technical-protocols
 其中 `Nonce` 是[随机生成的](https://github.com/serokell/time-warp-nt/blob/dfefb3ccbcd746909b10048e9f49641e1885a4ec/src/Node/Internal.hs#L1421)。
 
 
-然后对方[发送](https://github.com/serokell/time-warp-nt/blob/dfefb3ccbcd746909b10048e9f49641e1885a4ec/src/Node/Internal.hs#L1072) 以如下结构发送**确认**：
+然后对方[发送](https://github.com/serokell/time-warp-nt/blob/dfefb3ccbcd746909b10048e9f49641e1885a4ec/src/Node/Internal.hs#L1072)以如下结构发送**确认**：
 
 
     +------------------+-----------------+--------------+
@@ -84,15 +84,15 @@ group: technical-protocols
 
 
 [`PeerData`](https://github.com/input-output-hk/cardano-sl/blob/4378a616654ff47faf828ef51ab2f455fa53d3a3/infra/Pos/Communication/Types/Protocol.hs#L58)  是由对等体发送并由发起者解析的一些附加信息。`time-warp` 使您能够在握手过程中提供一些二进制数据，然后以不同的方式使用您的应用程序。这个数据的结构是互通的，[*应用程序级别*
-章节](/technical/protocols/csl-application-level/#message-names) 描述了卡尔达诺结算层如何使用 `PeerData`。
+章节](/technical/protocols/csl-application-level/#message-names)描述了卡尔达诺结算层如何使用 `PeerData`。
 
 ### 消息
 
 在讨论上层之前，我们来描述消息。
 
-为了让不同的消息类型指定不同的处理程序，发送的消息硬功实现 [`Message`](https://github.com/serokell/time-warp-nt/blob/724769fe102752050e31ed8f609316a8a3e59589/src/Node/Message/Class.hs#L54)  接口，定义两种方法：
-1. `messageName`，它将返回唯一的消息标识符，该标识符与消息本身一起发送，并允许接收者选择正确地处理程序来处理此消息。
-2. `formatMessage`， 它提供消息的描述，用于调试目的。
+为了让不同的消息类型指定不同的处理程序，发送的消息应该实现 [`Message`](https://github.com/serokell/time-warp-nt/blob/724769fe102752050e31ed8f609316a8a3e59589/src/Node/Message/Class.hs#L54)  接口，定义两种方法：
+1. `messageName`，它将返回唯一的消息标识符，该标识符与消息本身一起发送，并允许接收者选择正确的处理程序来处理此消息。
+2. `formatMessage`， 它提供消息的描述，用于调试。
 
 请查看 `Message` [实例](https://github.com/serokell/time-warp-nt/blob/8a4c8792049a589cdc3e87f6a863b026430b266e/test/Test/Util.hs#L133) 的 [`Parcel` 数据类型](https://github.com/serokell/time-warp-nt/blob/8a4c8792049a589cdc3e87f6a863b026430b266e/test/Test/Util.hs#L127)作为例子。
 
@@ -108,7 +108,7 @@ group: technical-protocols
 
 ***Listener*** 是一个消息的 [handler](https://github.com/serokell/time-warp-nt/blob/8a4c8792049a589cdc3e87f6a863b026430b266e/src/Node.hs#L117)。每个相关消息的 listener 成员类型，以及几个不重复消息类型的 listeners 可以被定义。
 
-请查看[完整例子](https://github.com/serokell/time-warp-nt/blob/e39f6b2c4a2aaaab308eddb9efee0503af73d927/examples/PingPong.hs) 获取技术细节。
+请查看[完整例子](https://github.com/serokell/time-warp-nt/blob/e39f6b2c4a2aaaab308eddb9efee0503af73d927/examples/PingPong.hs)获取技术细节。
 
 ### 序列化
 

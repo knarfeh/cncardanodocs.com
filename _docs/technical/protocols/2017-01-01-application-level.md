@@ -35,7 +35,7 @@ instance Message MsgGetHeaders where
 
 在这个特定的案例中，数据结构有两个字段：`mghFrom` 和 `mghTo`。使用 `mgh` 这样的前缀，是因为 Haskell 把记录字段的符号放在全局名字空间中，所有程序员有责任避免冲突。
 
-应该指出的是，有时你会看到使用类型变量 `ssc` 进行参数化的消息。这是为了使代码与我们进行共享种子计算的方式是多态的。[这里](https://github.com/input-output-hk/cardano-sl/blob/04dc8e4a640a62f0d82633f3a78ab3d8540fd5e6/src/Pos/Block/Network/Types.hs#L65-L67) 是一个消息的例子，首先发送最新的头部，minding `ssc`。（TODO）
+应该指出的是，有时你会看到使用类型变量 `ssc` 进行参数化的消息。这是为了使与我们进行共享种子计算的方式在代码上是多态的。[这里](https://github.com/input-output-hk/cardano-sl/blob/04dc8e4a640a62f0d82633f3a78ab3d8540fd5e6/src/Pos/Block/Network/Types.hs#L65-L67)是一个消息的例子，首先发送最新的头部，记作 `ssc`。
 
 消息序列化的方式可以在 [`Pos.Binary.Communication`](https://github.com/input-output-hk/cardano-sl/blob/04dc8e4a640a62f0d82633f3a78ab3d8540fd5e6/src/Pos/Binary/Communication.hs) 模块看到。
 
@@ -73,7 +73,7 @@ data DataMsg contents = DataMsg
 - `key` 表示节点标示符的类型。
 - `contents` 表示实际消息有效载荷的类型。
 
-为了通过 `Inv/Req/Data` 引入新消息，应该创建两种类型：这个消息的 `key` 和 `contents`，然后为它们都实现 [`MessagePart`](https://github.com/input-output-hk/cardano-sl/blob/69e896143cb02612514352e286403852264f0ba3/infra/Pos/Communication/MessagePart.hs#L9)
+为了通过 `Inv/Req/Data` 引入新消息，应该创建两种类型：这个消息的 `key` 和 `contents`，然后为它们都实现 [`MessagePart`](https://github.com/input-output-hk/cardano-sl/blob/69e896143cb02612514352e286403852264f0ba3/infra/Pos/Communication/MessagePart.hs#L9)。
 
 ``` haskell
 class MessagePart a where
@@ -104,7 +104,7 @@ class MessagePart a where
 
 ## 消息名称
 
-所有消息都有给定的名字，因为使用完整的类型名称超过了限度（TODO）。每个名称是一个或两个 `UnsignedVarInt` 编码的串联。
+所有消息都有给定的名字，因为使用完整的类型名称超过了限度。每个名称是一个或两个 `UnsignedVarInt` 编码的串联。
 
 该表包含所有使用的消息部分的名称。这些名字也可以在 [`Pos.Communication.Message`](https://github.com/input-output-hk/cardano-sl/blob/0906d8abc8e4ba8e1366defc3af0f5363e530146/src/Pos/Communication/Message.hs) 模块中找到。为了区分整数加法，连接在这里表示为 `(++)`
 
@@ -133,7 +133,7 @@ class MessagePart a where
 
 ## 委派消息
 
-委派是一个功能，它允许一个叫做 *issuer* 的权益所有人让另一个权益所有人（称为委托人）来代表它来生成块。
+委派是这样一个功能，它允许一个叫做 *issuer* 的权益所有人让另一个权益所有人（称为委托人）来代表它来生成块。
 
 为此，issuer 应该创建代理签名密钥，允许委托人签署代替 issuer 的区块。任何权益所有人都可以验证代理签名密钥实际上是由特定权益所有人通过特定代理发布的，并且该密钥在某个时间段是有效的。
 
@@ -156,8 +156,8 @@ class MessagePart a where
 
 重量级委派有两个目的：
 
-1. 委派生成区块的权利，就像轻量级委派那样。
-2. 与一些代表分享股份，从而允许代表参与 [追随中本聪算法](/glossary/#follow-the-satoshi)。没有真正的金钱转移；在为[追随中本聪算法](/glossary/#follow-the-satoshi)计算权益所有人时，issuer 的权益被加到代表的权益中。
+1. 就像轻量级委派那样，委派生成区块的权利。
+2. 与一些代表分享股份，从而允许代表参与[追随中本聪算法](/glossary/#follow-the-satoshi)。没有真正的金钱转移；在为[追随中本聪算法](/glossary/#follow-the-satoshi)计算权益所有人时，issuer 的权益被加到代表的权益中。
 
 每一个特定的权益所有人最多能与一个代表分享权益。为了撤销证书，节点应该创建一个新的证书，并将其自身同时作为颁发者和委托者。
 
@@ -181,7 +181,7 @@ class MessagePart a where
 
 你可以把它们视为消息的『操作人员』
 
-**Workers** 发起消息交换，因此 worker 是卡尔达诺结算层的积极沟通部分。**Listeners**可以从 workers 接收信息，且可能会发送一些消息作为回复。因此 listener 是卡尔达诺结算层的被动通信部分，收到信息后，listener 使用一种叫做 **handler** 的函数来实际执行相应的作业。根据收到的信息的类型使用特定的处理程序（如上所述，消息具有不同的类型）。
+**Workers** 发起消息交换，因此 worker 是卡尔达诺结算层的积极通信部分。**Listeners** 可以从 workers 接收信息，且可能会发送一些消息作为回复。因此 listener 是卡尔达诺结算层的被动通信部分，收到信息后，listener 使用一种叫做 **handler** 的函数来实际执行相应的作业。根据收到的信息的类型使用特定的处理程序（如上所述，消息具有不同的类型）。
 
 为了能够执行必要的操作，所有的 workers 和 handlers 在 `WorkMode` 进行工作（见下文）。
 
@@ -198,7 +198,8 @@ class MessagePart a where
 
 这是另一个例子 - [`requestHeaders`](https://github.com/input-output-hk/cardano-sl/blob/83fbebb3eec16c30a96c499301250c5a3756c0c1/src/Pos/Block/Network/Logic.hs#L261) 功能。这个函数处理预期的区块头，并在本地跟踪它们。在[这个地方](https://github.com/input-output-hk/cardano-sl/blob/83fbebb3eec16c30a96c499301250c5a3756c0c1/src/Pos/Block/Network/Logic.hs#L271)，它向 listener 发送一种类型为 `MsgGetHeaders` 的信息，而[在这](https://github.com/input-output-hk/cardano-sl/blob/83fbebb3eec16c30a96c499301250c5a3756c0c1/src/Pos/Block/Network/Logic.hs#L275)，它从这个 listener 接收一个类型为 `MsgHeaders` 的回答。
 
-[`Pos.Block.Worker`](https://github.com/input-output-hk/cardano-sl/blob/d564b3f5a7e03e086b62c88212870b5ea89f5e8b/src/Pos/Block/Worker.hs) 模块中定义了用于区块处理的其他 worker。我们重用了上述的 `retrievalWorker`（TODO），并记载了一个记录良好的 `blkOnNewSlot` worker。它代表了一个新 slot 开始时应该完成的操作，这个操作包括以下步骤：
+[`Pos.Block.Worker`](https://github.com/input-output-hk/cardano-sl/blob/d564b3f5a7e03e086b62c88212870b5ea89f5e8b/src/Pos/Block/Worker.hs) 模块中定义了用于区块处理的其他 worker。我们重用了上述的 `retrievalWorker`（TODO：and define a
+[well-documented](https://github.com/input-output-hk/cardano-sl/blob/a5f7991ff03a1e45114b901bfbbbb1ee3cd4d194/src/Pos/Block/Worker.hs#L82)），并记载了一个记录良好的 `blkOnNewSlot` worker。它代表了一个新 slot 开始时应该完成的操作，这个操作包括以下步骤：
 
 1. 如有必要，生成一个[创始区块](https://github.com/input-output-hk/cardano-sl/blob/a5f7991ff03a1e45114b901bfbbbb1ee3cd4d194/src/Pos/Block/Worker.hs#L100)。
 2. 获取当前 epoch 的 leader。
@@ -206,7 +207,7 @@ class MessagePart a where
 
 ### 逻辑
 
-处理区块的方式在 [`Pos.Block.Logic`](https://github.com/input-output-hk/cardano-sl/tree/a5f7991ff03a1e45114b901bfbbbb1ee3cd4d194/src/Pos/Block/Logic) 模块中定义。请阅读 [卡尔达诺结算层中的区块](/technical/blocks/)获取关于区块的更多信息。
+处理区块的方式在 [`Pos.Block.Logic`](https://github.com/input-output-hk/cardano-sl/tree/a5f7991ff03a1e45114b901bfbbbb1ee3cd4d194/src/Pos/Block/Logic) 模块中定义。请阅读[卡尔达诺结算层中的区块](/technical/blocks/)获取关于区块的更多信息。
 
 ### 区块处理 Listeners
 
@@ -214,7 +215,7 @@ class MessagePart a where
 
 处理程序 [`handleGetHeaders`](https://github.com/input-output-hk/cardano-sl/blob/fa5d01c08124934f01f2df22f2bc8784198f56c0/src/Pos/Block/Network/Listeners.hs#L46) 发送区块头部：[在这](https://github.com/input-output-hk/cardano-sl/blob/fa5d01c08124934f01f2df22f2bc8784198f56c0/src/Pos/Block/Network/Listeners.hs#L89)，它从 worker 收到一个 `MsgGetHeaders` 类型的信息，[获取头部](https://github.com/input-output-hk/cardano-sl/blob/fa5d01c08124934f01f2df22f2bc8784198f56c0/src/Pos/Block/Network/Listeners.hs#L95)，然后[在这](https://github.com/input-output-hk/cardano-sl/blob/92cf690dc3be9af29502f493cbf9e8072b56cb67/src/Pos/Block/Network/Logic.hs#L140)，它向 worker 发送 `MsgHeaders` 类型的回复信息。
 
-[`handleGetBlocks`](https://github.com/input-output-hk/cardano-sl/blob/fa5d01c08124934f01f2df22f2bc8784198f56c0/src/Pos/Block/Network/Listeners.hs#L54) 处理程序发送区块。这个处理程序对应 [`retrievalWorker`](https://github.com/input-output-hk/cardano-sl/blob/08fa863502baeb399e15f525540050a117430d95/src/Pos/Block/Network/Retrieval.hs#L50) 的 [`retrieveBlocks`](https://github.com/input-output-hk/cardano-sl/blob/08fa863502baeb399e15f525540050a117430d95/src/Pos/Block/Network/Retrieval.hs#L319)，因此，它从 worker [这里](https://github.com/input-output-hk/cardano-sl/blob/a5f7991ff03a1e45114b901bfbbbb1ee3cd4d194/src/Pos/Block/Network/Listeners.hs#L60) 接收 `MsgGetBlocks` 类型的信息，[获得对应的头部](https://github.com/input-output-hk/cardano-sl/blob/7fdf6c8d0d2f62948f4685b923b7671db137d7b3/src/Pos/Block/Logic/Header.hs#L331) ，然后[在这里](https://github.com/input-output-hk/cardano-sl/blob/a5f7991ff03a1e45114b901bfbbbb1ee3cd4d194/src/Pos/Block/Network/Listeners.hs#L71) 向这个 worker 发送 `MsgBlock` 类型的响应信息。
+[`handleGetBlocks`](https://github.com/input-output-hk/cardano-sl/blob/fa5d01c08124934f01f2df22f2bc8784198f56c0/src/Pos/Block/Network/Listeners.hs#L54) 处理程序发送区块。这个处理程序对应 [`retrievalWorker`](https://github.com/input-output-hk/cardano-sl/blob/08fa863502baeb399e15f525540050a117430d95/src/Pos/Block/Network/Retrieval.hs#L50) 的 [`retrieveBlocks`](https://github.com/input-output-hk/cardano-sl/blob/08fa863502baeb399e15f525540050a117430d95/src/Pos/Block/Network/Retrieval.hs#L319)，因此，它从 worker [这里](https://github.com/input-output-hk/cardano-sl/blob/a5f7991ff03a1e45114b901bfbbbb1ee3cd4d194/src/Pos/Block/Network/Listeners.hs#L60)接收 `MsgGetBlocks` 类型的信息，[获得对应的头部](https://github.com/input-output-hk/cardano-sl/blob/7fdf6c8d0d2f62948f4685b923b7671db137d7b3/src/Pos/Block/Logic/Header.hs#L331) ，然后[在这里](https://github.com/input-output-hk/cardano-sl/blob/a5f7991ff03a1e45114b901bfbbbb1ee3cd4d194/src/Pos/Block/Network/Listeners.hs#L71)向这个 worker 发送 `MsgBlock` 类型的响应信息。
 
 处理程序 [`handleBlockHeaders`](https://github.com/input-output-hk/cardano-sl/blob/0d28e6133bd6349f5236bcebab39ea6bfc4c2b7e/src/Pos/Block/Network/Listeners.hs#L85) 以类似的方式发送未经请求的用例的区块头部：它接收来自 worker 的 [`MsgHeaders`](https://github.com/input-output-hk/cardano-sl/blob/0d28e6133bd6349f5236bcebab39ea6bfc4c2b7e/src/Pos/Block/Network/Listeners.hs#L95) 类型，并处理它。
 
