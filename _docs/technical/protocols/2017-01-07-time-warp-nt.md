@@ -11,6 +11,7 @@ group: technical-protocols
 [`time-warp`](https://github.com/serokell/time-warp-nt/) 是为提供不同抽象层次方法的可靠网络层而开发的。`time-warp` 另一个重要的目标是提供一种使用仿真模式编写和运行分布式系统测试的简单方法，该模式可以足够灵活地支持各种情况（可调节网络延迟，断开连接和其他实时情况）。
 
 `time-warp` 主要分为两个部分：
+
 1. `Mockable` 接口。
 2. 网络功能。
 
@@ -78,7 +79,7 @@ group: technical-protocols
 
 其中 `Nonce` 是[来自请求的相同随机数](https://github.com/serokell/time-warp-nt/blob/dfefb3ccbcd746909b10048e9f49641e1885a4ec/src/Node/Internal.hs#L1067)
 
-如果发起者以正确地随机数接收到确认，则开始对话。
+如果发起者已正确地随机数接收到确认，则开始对话。
 
 如果节点从未发送过任何请求（对等点发生协议错误），则会发生相反的情况。也有可能是节点确实发送了 `BI_SYN`，但对话的处理程序已经完成了。这是正常的，节点应该忽略这个确认。
 
@@ -94,7 +95,7 @@ group: technical-protocols
 1. `messageName`，它将返回唯一的消息标识符，该标识符与消息本身一起发送，并允许接收者选择正确的处理程序来处理此消息。
 2. `formatMessage`， 它提供消息的描述，用于调试。
 
-请查看 `Message` [实例](https://github.com/serokell/time-warp-nt/blob/8a4c8792049a589cdc3e87f6a863b026430b266e/test/Test/Util.hs#L133) 的 [`Parcel` 数据类型](https://github.com/serokell/time-warp-nt/blob/8a4c8792049a589cdc3e87f6a863b026430b266e/test/Test/Util.hs#L127)作为例子。
+请查看 `Message` [实例](https://github.com/serokell/time-warp-nt/blob/8a4c8792049a589cdc3e87f6a863b026430b266e/test/Test/Util.hs#L133)的 [`Parcel` 数据类型](https://github.com/serokell/time-warp-nt/blob/8a4c8792049a589cdc3e87f6a863b026430b266e/test/Test/Util.hs#L127)作为例子。
 
 
 ### 上层
@@ -120,5 +121,5 @@ group: technical-protocols
 2.  `unpackMsg`， 展示将数据解压缩。
 
 
-请查阅 `Serializable` [实例](https://github.com/serokell/time-warp-nt/blob/fef2c9943d279403386d204554b1c08fc357f196/src/Node/Message/Binary.hs#L43)作为 [`BinaryP` 数据类型](https://github.com/serokell/time-warp-nt/blob/fef2c9943d279403386d204554b1c08fc357f196/src/Node/Message/Binary.hs#L20) 的例子。
+请查阅 `Serializable` [实例](https://github.com/serokell/time-warp-nt/blob/fef2c9943d279403386d204554b1c08fc357f196/src/Node/Message/Binary.hs#L43)作为 [`BinaryP` 数据类型](https://github.com/serokell/time-warp-nt/blob/fef2c9943d279403386d204554b1c08fc357f196/src/Node/Message/Binary.hs#L20)的例子。
 
