@@ -27,7 +27,7 @@ children: technical
 -   slot 持续时间: 120秒,
 -   安全参数 *k*: 60.
 
-换句话说，, **一个 slot 可以持续120秒**, 而一个 epochs有 [`10×k`](https://github.com/input-output-hk/cardano-sl/blob/9ee12d3cc9ca0c8ad95f3031518a4a7acdcffc56/core/Pos/Core/Constants/Raw.hs#L161)
+换句话说，**一个 slot 可以持续120秒**, 而一个 epochs有 [`10×k`](https://github.com/input-output-hk/cardano-sl/blob/9ee12d3cc9ca0c8ad95f3031518a4a7acdcffc56/core/Pos/Core/Constants/Raw.hs#L161)
 个 slot, 所以它可以持续**1200分钟**或**20个小时**.
 
 每个 slot 上有一个节点被称作 slot 领导者。只有这个 slot 有权在这些 slot 中生成一个新区块；这个区块会被加入到区块链中。然而我们并不能确保这个区块一定会被生成(比如 slot 领导者在响应的过程中可能会离线)。
@@ -38,7 +38,7 @@ children: technical
 
 在 epoch 中，节点之间相互发送 MPC 消息，以达成共识，谁将被允许在下一个时期生成区块。Data 消息中的有效载荷 （以及事务）会被包含在块中。
 
-一个地址持有的货币（或『股份』）越多，被选择生成一个区块的可能性就越大。请阅读 [乌洛波罗斯 权益证明算法](/cardano/proof-of-stake/)获取更多细节。
+一个地址持有的货币（或『股份』）越多，被选择生成一个区块的可能性就越大。请阅读[乌洛波罗斯权益证明算法](/cardano/proof-of-stake/)获取更多细节。
 
 
 简而言之:
@@ -84,8 +84,9 @@ children: technical
 
 通常，一个链（主链）由一个节点维护，但最终可能会出现分叉链。回想一下，只有区块 `k` 和更多 slot 被认为是稳定的。这样一来，如果接收一个区块，它既不是区块链的一部分也不是 blockchain 的延续，我们首先检查其复杂程度（复杂性是链的长度）是否比我们的大，TODO
 
-
 然后我们开始随后请求来自先前块提供替代链头的节点。如果我们来得深入k插槽前，替代链被拒绝。否则，一旦我们到达我们连锁店中​​存在的区块，替代链就会被添加到存储区。从国家的角度来看，我们存储和维护所有可行的替代链。如果看起来一个替代链比主链更长，那么它们被替换，使替代链成为新的主链。
+
+TODO：
 
 Generally, one chain (the *main chain*) is maintained by a node, but eventually
 alternative chains may arise. Recall that only blocks `k` and more slots deep are
