@@ -71,12 +71,12 @@ Accound 应该重命名为地址。请查看这个 issues [CSM-249](https://issu
 
 这个通道充当通知系统。以便可以告知代达罗斯 UI 相关事件。目前支持的事件有：
 
- - `LocalDifficultyChanged` - 当前区块链高度
- - `NetworkDifficultyChanged` - 全球区块链高度
- - `UpdateAvailable` - 新的系统可用更新
- - `ConnectedPeersChanged` - 连接到对等节点数量的改变
- - `ConnectionOpened` - 打开 websocket 连接
- - `ConnectionClosed` - 关闭 websocket 连接
+ - `LocalDifficultyChanged` - 当前区块链高度，
+ - `NetworkDifficultyChanged` - 全球区块链高度，
+ - `UpdateAvailable` - 新的系统可用更新，
+ - `ConnectedPeersChanged` - 连接到对等节点数量的改变，
+ - `ConnectionOpened` - 打开 websocket 连接，
+ - `ConnectionClosed` - 关闭 websocket 连接。
 
 由于此通道是单向的，因此从客户端发送到通道的任何消息都会被忽略。
 

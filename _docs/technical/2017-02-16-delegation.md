@@ -26,19 +26,19 @@ visible: true
 
 这是[代理签名](https://github.com/input-output-hk/cardano-sl/blob/d01d392d49db8a25e17749173ec9bce057911191/core/Pos/Crypto/Signing.hs#L256)的格式。它包括了：
 
-* 代理私钥
-* 签名
+* 代理私钥，
+* 签名。
 
 代理私钥包括：
 
-1. omega 值
-2. 发行人的公钥
-3. 代表团的公钥
-4. 代理证书
+1. omega 值，
+2. 发行人的公钥，
+3. 代表团的公钥，
+4. 代理证书。
 
 Omega (or ω) 是[论文](/glossary/#paper)中一个特殊的值。在我们的实现中，它是[一对 epoch 的标识符](https://github.com/input-output-hk/cardano-sl/blob/f374a970dadef0fe62cf69e8b9a6b8cc606b5c7d/core/Pos/Core/Types.hs#L235)。这些标识符定义了委托有效期：如果 epoch 索引在这个范围内那么生产的区块就是有效的。
 
-[代理证书](https://github.com/input-output-hk/cardano-sl/blob/d01d392d49db8a25e17749173ec9bce057911191/core/Pos/Crypto/Signing.hs#L209)就是 omega 和代表团公钥的[签名](https://github.com/input-output-hk/cardano-crypto/blob/84f8c358463bbf6bb09168aac5ad990faa9d310a/src/Cardano/Crypto/Wallet.hs#L74)
+[代理证书](https://github.com/input-output-hk/cardano-sl/blob/d01d392d49db8a25e17749173ec9bce057911191/core/Pos/Crypto/Signing.hs#L209)就是 omega 和代表团公钥的[签名](https://github.com/input-output-hk/cardano-crypto/blob/84f8c358463bbf6bb09168aac5ad990faa9d310a/src/Cardano/Crypto/Wallet.hs#L74)。
 
 ## 重量级委派
 
@@ -60,14 +60,14 @@ Omega (or ω) 是[论文](/glossary/#paper)中一个特殊的值。在我们的�
 
 与重量级委托相反，轻量级委派不要求代表团拥有 `T` 或更多的股份。所以轻量级委派可以用于任何的节点。但是轻量级委派的代理签名证书不存在区块链中，所以轻量级委派证书必须要广播到代表团。
 
-之后轻量级 PSK 可以被指定发行者的公钥、签名和信息本身进行[验证](https://github.com/input-output-hk/cardano-sl/blob/42f413b65eeacb59d0b439d04073edcc5adc2656/lib/src/Pos/Delegation/Logic/Mempool.hs#L309)
+之后轻量级 PSK 可以被指定发行者的公钥、签名和信息本身进行[验证](https://github.com/input-output-hk/cardano-sl/blob/42f413b65eeacb59d0b439d04073edcc5adc2656/lib/src/Pos/Delegation/Logic/Mempool.hs#L309)。
 
 请注意『每个 epoch 只能发布一个证书』的规则在轻量级委托中不适用。因为轻量级证书不存储在区块链中，所以可以在每个 epoch 签发很多轻量级证书，不会导致区块链膨胀。
 
 
 ### 确认代理签名支付
 
-代表团应该使用他拥有的代理签名密钥，使用 PSK 和代表团的钥匙制作一个 PSK 签名。如果签名是正确地，那么就是由代表团进行签名的（由 PSK 策略确保是这种结果）。
+代表团应该使用他拥有的代理签名密钥，使用 PSK 和代表团的钥匙制作一个 PSK 签名。如果签名是正确的，那么就是由代表团进行签名的（由 PSK 策略确保是这种结果）。
 
 ## 为什么有两个委派
 
@@ -81,9 +81,9 @@ Omega (or ω) 是[论文](/glossary/#paper)中一个特殊的值。在我们的�
 
 回撤证书是一种特殊的证书，发行者创建一个回撤证书来撤回委托。重量级委托和轻量级委托都可以被撤回，不过撤回的方法不同。
 
-作为相同的标准PSK的发行者和委派，撤销证书也是相同的。（换句话说，发行者委派给他自己）
+作为相同的标准 PSK 的发行者和委派，撤销证书也是相同的。（换句话说，发行者委派给他自己）
 
-要撤销轻量级委派，发行者发送撤销证书给网络，要求撤销委派，但是不能强制撤销，因为轻量级的 PSK 不是区块链的一部分。所以理论上轻量级委派是可以忽略撤销证书的，这样的话，他就一直保持着委派知道它的委派过期。但这样的情况不会妨碍区块链。
+要撤销轻量级委派，发行者发送撤销证书给网络，要求撤销委派，但是不能强制撤销，因为轻量级的 PSK 不是区块链的一部分。所以理论上轻量级委派是可以忽略撤销证书的，这样的话，他就一直保持着委派直到它的委派过期。但这样的情况不会妨碍区块链。
 
 重量级委派撤销的处理是另一种方式。因为来自重量级委派的代理签名证书是存储在区块链中的，撤销证书也会被提交到区块链中。这种情况下，节点会删除撤销证书签发之前的重量级委派证。不过有三点很重要：
 
