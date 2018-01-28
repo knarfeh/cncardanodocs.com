@@ -86,122 +86,60 @@ children: technical
 
 然后我们开始随后请求来自先前块提供替代链头的节点。如果我们来得深入k插槽前，替代链被拒绝。否则，一旦我们到达我们连锁店中​​存在的区块，替代链就会被添加到存储区。从国家的角度来看，我们存储和维护所有可行的替代链。如果看起来一个替代链比主链更长，那么它们被替换，使替代链成为新的主链。
 
-TODO：
-
-Generally, one chain (the *main chain*) is maintained by a node, but eventually
-alternative chains may arise. Recall that only blocks `k` and more slots deep are
-considered stable. This way, if a block which is neither a part nor a
-continuation of our blockchain is received, we first check if its complexity is
-bigger than ours (the complexity is the length of the chain), and then we start
-subsequently requesting previous blocks from the node that provided an
-alternative chain header. If we come deeper than `k` slots ago, the alternative
-chain gets rejected. Otherwise, once we get to the block existing in our chain,
-the alternative chain is added to storage. From the standpoint of state, we
-store and maintain all the alternative chains that are viable. If it appears
-that an alternative chain is longer than the main chain, they are swapped,
-making the alternative chain the new main chain.
-
-## Supplemental parts
+## 补充部分
 
 ### Slotting
 
-The consensus scheme we use relies on correct slotting. More specifically, it
-relies on the assumption that nodes in the system have access to the current
-time (small deviations are acceptable), which is then used to figure out when
-any particular slot begins and ends, and perform particular actions in this
-slot.
+我们使用的共识方案依赖于正确的 slot。更具体地说，它依赖于系统中的节点可以访问的当前时间（小的偏差是可接受的），然后用于确定何时开始和结束任何特定的 slot，并且在该 slot 执行特定的动作。
 
-System start time is a timestamp of the `(0,0)` slot (i.e. the 0-th slot of the 0-th
-epoch).
+系统开始时间是 `(0,0)` slot 的时间戳（即，第0 epoch 的第0slot）。
 
-## P2P Network
+## P2P 网络
 
-### Peer discovery
+### Peer 发现
 
-We use Kademlia DHT for peer discovery. It is a general solution for distributed
-hash tables, based on [a whitepaper by Petar Maymounkov and David Mazières,
-2002](https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf).
+我们使用 Kademlia DHT 进行对等节点的发现。这是基于 [Kademlia: 基于 XOR 度量的 P2P 信息系统](https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf) 的哈希表的通用解决方案。
 
-However, we only take advantage of its peer discovery mechanism, and use none of
-its hash table capabilities.
+简言之，在 Kademlia 网络的每个节点都被提供一个 `160` 字节的随机生成的 id。节点之间的距离由 `XOR` 确定。网络以这样的方式组织：节点对于每个相对距离：`2^i < d <= 2^(i+1)` 只知道 `K` (在最初的客户端实现中 `K=7`)。
 
-In short, each node in the Kademlia network is provided a `160`-bit id generated
-randomly. The distance between the nodes is defined by `XOR` metric. The network
-is organized in such a way that node knows no more than `K` (`K=7` in the
-original client implementation) nodes for each relative distance range:
-`2^i < d <= 2^(i+1)`.
+初始对等节点通过[发送](https://github.com/serokell/kademlia/blob/bbdca50c263c6dae251e67eb36a7d4e1ba7c1cb6/src/Network/Kademlia/Implementation.hs#L194) Kademlia 的 `FIND_NODE` 信息完成，它带有以自己节点 ID 作为[预先配置的一组节点](https://github.com/input-output-hk/cardano-sl/blob/43a2d079a026b90ba860e79b5be52d1337e26c6f/src/Pos/Constants.hs#L89)以及通过用户命令行输入的节点的参数。我们的实现中会一次[发送](https://github.com/input-output-hk/cardano-sl/blob/43a2d079a026b90ba860e79b5be52d1337e26c6f/infra/Pos/DHT/Real/Real.hs#L228)这个请求给所有已知的对等节点，然后等待第一个回复。
 
-Initial peer discovery is done by
-[sending](https://github.com/serokell/kademlia/blob/bbdca50c263c6dae251e67eb36a7d4e1ba7c1cb6/src/Network/Kademlia/Implementation.hs#L194)
-a Kademlia `FIND_NODE` message with our own node id as a parameter to [a
-pre-configured set of
-nodes](https://github.com/input-output-hk/cardano-sl/blob/43a2d079a026b90ba860e79b5be52d1337e26c6f/src/Pos/Constants.hs#L89)
-and the nodes passed by the user on the command line. Our implementation
-[sends](https://github.com/input-output-hk/cardano-sl/blob/43a2d079a026b90ba860e79b5be52d1337e26c6f/infra/Pos/DHT/Real/Real.hs#L228)
-this request to all known peers at once and then waits for the first reply.
-
-While the client runs, it collects peers per Kademlia protocol. The list of
-known peers is preserved and
-[restored](https://github.com/serokell/kademlia/blob/bbdca50c263c6dae251e67eb36a7d4e1ba7c1cb6/src/Network/Kademlia.hs#L197)
-between subsequent launches. For each peer, we keep their [host and port
-number](https://github.com/serokell/kademlia/blob/bbdca50c263c6dae251e67eb36a7d4e1ba7c1cb6/src/Network/Kademlia/Types.hs#L42),
-as well as their [node
-id](https://github.com/serokell/kademlia/blob/bbdca50c263c6dae251e67eb36a7d4e1ba7c1cb6/src/Network/Kademlia/Types.hs#L70).
+客户端运行时，每个 Kademlia 协议收集对等节点。已知对等节点在后续启动之间保存，[恢复](https://github.com/serokell/kademlia/blob/bbdca50c263c6dae251e67eb36a7d4e1ba7c1cb6/src/Network/Kademlia.hs#L197)。对于每个对等体，我们保存其[主机和端口号](https://github.com/serokell/kademlia/blob/bbdca50c263c6dae251e67eb36a7d4e1ba7c1cb6/src/Network/Kademlia/Types.hs#L42)，以及它们的[节点 id](https://github.com/serokell/kademlia/blob/bbdca50c263c6dae251e67eb36a7d4e1ba7c1cb6/src/Network/Kademlia/Types.hs#L70)。
 
 ### Messaging
 
-Kademlia already provides the notion of nodes that are known. Such nodes can be
-called *neighbors*. To send message to all nodes in a network, you can send it
-to neighbors, they will resend it to their neighbors, and so on. But sometimes
-we may need to not propagate messages across all network, but send it to
-neighbors only. Hence we have three types of sending messages:
+Kademlia 已经提供了已知节点的概念。这样的节点可以被称为*邻居*。要将消息发送到网络上的所有节点，你可以发送给邻居，它们会将其发送给它们的邻居，依次类推。但有时候我们可能不需要在整个网络上传播消息，而是只将消息发送给邻居。因此我们有三种类型的发送消息：
 
--   send to a node,
--   send to neighbors,
--   send to network.
+- 发送给一个节点，
+- 发送给邻居，
+- 发送给网络。
 
-#### Message types
+#### 消息类型
 
-To handle this, three kind of message headers are used, and there are two
-message types:
+为了处理这个，使用三种消息头，并且有两种消息：
 
--   Simple: sending to a single peer.
--   Broadcast: attempting to send to the entire network, iteratively sending
-    messages to neighbors.
+- 简单：发送给一个同伴。
+- 广播：试图发送到整个网络，迭代地发送消息到邻居。
 
-Broadcast messages are resent to neighbors right after retrieval (before
-handling). Also, they are being checked against LRU cache, and messages that
-have been already received once get ignored.
+广播消息在检索（在处理之前）重新发送给邻居。而且，它们会通过 LRU 缓存检查，已经收到的消息会被忽略。
 
-### Leaders and rich men computation (LRC)
 
-"Slot leaders" and "rich men" are two important notions of 乌洛波罗斯 Proof of
-Stake Algorithm.
+### 领导者和富人计算（LRC）
 
--   Slot leaders: Slot leaders for the current epoch (for each slot of the
-    current epoch) are computed by [Follow the
-    Satoshi](/cardano/proof-of-stake/#follow-the-satoshi) (FTS) algorithm in the
-    beginning of current epoch. FTS uses a `shared seed` which is result of
-    [Multi Party Computation](/cardano/proof-of-stake/#multi-party-computation)
-    (MPC) algorithm for previous epoch: in the result of MPC some nodes reveal
-    their seeds, `xor` of these seeds is called `shared seed`.
+『Slot 领导者』和『富人』是乌洛波罗斯权益证明算法的重要概念。
 
--   Rich men: Only nodes that have sent their VSS certificates and also have
-    enough stake can participate in the MPC algorithm. So in the beginning of
-    epoch node must know all potential participants for validation of MPC
-    messages during this epoch. Rich men are also computed in the beginning of
-    current epoch.
+- Slot 领导者：当前 epoch（当前 epoch 的每个 slot） 的 slot 领导者是在而当前 epoch 开始时通过[追随中本聪](/cardano/proof-of-stake/#追随中本聪)（FTS）计算的。FTS 使用 `shared seed`，它是前一个 epoch [多方计算](/cardano/proof-of-stake/#多方计算)（MPC）算法的结果：MPC 结果中，一些节点揭露它们的 种子，这些种子的 `xor` 称为 `shared seed`。
 
-Rich men are important for other components as well; for instance, Update system
-uses rich men for checking that node can publish update proposal and vote.
+- 富人：只有已经发送 VSS 证书并且有足够权益的节点才能参与 MPC 算法。在 epoch 的开始，节点必须知道所有潜在的参与者以在这个 epoch 中验证 MPC 消息。富人也是在当前 epoch 的开始计算的。
 
-There are two ways of computing who the rich men will be: - considering common
-stake - considering delegated stake (乌洛波罗斯 provides opportunity to delegate
-own stake to other node, see more in [Delegation
-section](/cardano/differences/#stake-delegation))
+富人对于其他组件也很重要；例如，更新系统使用富人判断节点是否可以发布更新协议和投票。
 
-MPC and Update System components need rich men with delegated stake, but
-Delegation component with common stake.
+有两种计算富人的方法：
+
+- 考虑共同权益 
+- 考虑委派权益（乌洛波洛斯提供委派自己权益给其他节点的机会，更多信息请参阅[委派章节](/cardano/differences/#权益委派)。
+
+MPC 和更新系统组件需要具有委派权益的富人，但不需要拥有共同权益的委派组成。
 
 ## 常量
 
