@@ -1,6 +1,12 @@
-# WIP
+# 2018-02-17 更新
+
+翻译已被官方收录，如果大家发现什么问题，可以直接 fix 原仓库 [input-output-hk/cardanodocs.com](https://github.com/input-output-hk/cardanodocs.com) 的代码。
+
+---
 
 # 卡尔达诺结算层中文文档
+
+
 
 [cncardanodocs.com](http://cncardanodocs.com/)。基于 [Jekyll](https://jekyllrb.com/) 以及 [Github Pages](https://pages.github.com/) 构建。
 
